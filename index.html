@@ -1,1 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>X-Wing — Scroll Cinematic</title>
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html, body {
+    background: #000008;
+    color: #e8eefc;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Fixed 3D canvas sits behind everything and never captures clicks */
+  #scene {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Scrollable HTML content layer */
+  main {
+    position: relative;
+    z-index: 1;
+  }
+
+  section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8vh 8vw;
+    pointer-events: none;
+  }
+
+  .left  { align-items: flex-start; text-align: left; }
+  .right { align-items: flex-end;   text-align: right; }
+
+  h1, h2 {
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    text-shadow:
+      0 0 8px  rgba(0,0,0,0.95),
+      0 0 24px rgba(0,0,0,0.85),
+      0 4px 40px rgba(90,170,255,0.55);
+  }
+  h1 { font-size: clamp(2.6rem, 9vw, 7rem); }
+  h2 { font-size: clamp(2rem,   6vw, 4.5rem); }
+
+  p {
+    max-width: 42ch;
+    margin-top: 1.2rem;
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    line-height: 1.6;
+    color: #c8d4ea;
+    text-shadow:
+      0 2px 12px rgba(0,0,0,0.9),
+      0 0 24px rgba(0,0,0,0.7);
+  }
+
+  .accent { color: #6ec8ff; }
+</style>
+</head>
+<body>
+
+<!-- Fixed 3D background canvas -->
+<canvas id="scene"></canvas>
+
+<!-- Scrollable content -->
+<main>
+  <section class="left">
+    <h1>X-Wing</h1>
+    <p>An obsolete design, but she'll do. <span class="accent">Scroll to engage.</span></p>
+  </section>
+
+  <section class="right">
+    <h2>Engage</h2>
+    <p>Lock S-foils in attack position.</p>
+  </section>
+
+  <section class="left">
+    <h2>Flyby</h2>
+    <p>Watch it burn past the canopy.</p>
+  </section>
+
+  <section class="right">
+    <h2>Into the Stars</h2>
+    <p>Punch it.</p>
+  </section>
+
+  <section class="left">
+    <h2>&nbsp;</h2>
+    <p class="accent">…</p>
+  </section>
+</main>
+
+<!-- Three.js import map (r170+) -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<!-- GSAP + ScrollTrigger (UMD builds) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<script type="module">
+/* ============================================================================
+ *  X-WING — CINEMATIC SCROLL LANDING PAGE
+ *  ---------------------------------------------------------------------------
+ *  Sections in this file:
+ *    1. Imports & GSAP registration
+ *    2. Renderer / Scene / Camera
+ *    3. Lighting
+ *    4. Starfield
+ *    5. Asteroids
+ *    6. X-Wing (placeholder primitives, easy to swap for a .glb)
+ *    7. Scroll-driven animation (GSAP + ScrollTrigger)
+ *    8. Resize handler
+ *    9. Render loop
+ * ==========================================================================*/
+
+import * as THREE from 'three';
+// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // <-- uncomment when using a real .glb
+
+gsap.registerPlugin(ScrollTrigger);
+
+
+/* ============================================================================
+ * 1. RENDERER / SCENE / CAMERA
+ * ==========================================================================*/
+const canvas = document.getElementById('scene');
+
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias: true,
+  alpha: false,
+  powerPreference: 'high-performance'
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));   // cap DPR for perf
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000008, 1);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000008);
+// Exponential fog: subtle distance haze so far objects fade into the void
+scene.fog = new THREE.FogExp2(0x000008, 0.0018);
+
+const camera = new THREE.PerspectiveCamera(
+  55,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  800
+);
+camera.position.set(0, 2, 12);
+camera.lookAt(0, 0, 0);
+
+
+/* ============================================================================
+ * 2. LIGHTING
+ * ==========================================================================*/
+scene.add(new THREE.AmbientLight(0x334466, 0.55));
+
+// Key "sun" — cool white, from upper-left
+const sun = new THREE.DirectionalLight(0xaac8ff, 2.2);
+sun.position.set(-30, 40, 30);
+scene.add(sun);
+
+// Warm rim/back light — separates the ship from the black background
+const rim = new THREE.DirectionalLight(0xff6644, 0.9);
+rim.position.set(40, -20, -30);
+scene.add(rim);
+
+
+/* ============================================================================
+ * 3. STARFIELD  (2500–4000 points on a large spherical shell)
+ * ==========================================================================*/
+function createStars() {
+  const count = 3600;
+  const positions = new Float32Array(count * 3);
+  const colors    = new Float32Array(count * 3);
+  const col = new THREE.Color();
+
+  for (let i = 0; i < count; i++) {
+    // Random point on a thick spherical shell
+    const r     = 120 + Math.random() * 320;
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(2 * Math.random() - 1);
+
+    positions[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i * 3 + 2] = r * Math.cos(phi);
+
+    // Slight per-star colour variation (cool blues → warm whites)
+    col.setHSL(0.55 + Math.random() * 0.12, 0.35, 0.65 + Math.random() * 0.35);
+    colors[i * 3]     = col.r;
+    colors[i * 3 + 1] = col.g;
+    colors[i * 3 + 2] = col.b;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+
+  const mat = new THREE.PointsMaterial({
+    size: 1.5,
+    sizeAttenuation: true,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.95,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    fog: false                       // stars should not be fogged
+  });
+
+  const stars = new THREE.Points(geo, mat);
+  stars.name = 'stars';
+  return stars;
+}
+scene.add(createStars());
+
+
+/* ============================================================================
+ * 4. ASTEROIDS  (48 procedural low-poly icosahedrons that slowly spin)
+ * ==========================================================================*/
+function createAsteroids() {
+  const group = new THREE.Group();
+  group.name = 'asteroids';
+
+  // One shared geometry + material for all rocks (cheap & fast)
+  const geo = new THREE.IcosahedronGeometry(1, 0);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0x4a4038,
+    roughness: 0.95,
+    metalness: 0.12,
+    flatShading: true
+  });
+
+  const list = [];
+  const COUNT = 48;
+
+  for (let i = 0; i < COUNT; i++) {
+    const rock = new THREE.Mesh(geo, mat);
+
+    // Scatter across a broad volume in front of the camera
+    rock.position.set(
+      (Math.random() - 0.5) * 220,
+      (Math.random() - 0.5) * 140,
+      30 - Math.random() * 320
+    );
+
+    // Random non-uniform scale, still reads as a rock
+    const s = 0.6 + Math.random() * 2.6;
+    rock.scale.set(
+      s * (0.7 + Math.random() * 0.6),
+      s * (0.7 + Math.random() * 0.6),
+      s * (0.7 + Math.random() * 0.6)
+    );
+
+    rock.rotation.set(
+      Math.random() * Math.PI,
+      Math.random() * Math.PI,
+      Math.random() * Math.PI
+    );
+
+    // Store a slow per-axis spin vector
+    rock.userData.spin = new THREE.Vector3(
+      (Math.random() - 0.5) * 0.35,
+      (Math.random() - 0.5) * 0.35,
+      (Math.random() - 0.5) * 0.35
+    );
+
+    group.add(rock);
+    list.push(rock);
+  }
+
+  return { group, list };
+}
+const { group: asteroidGroup, list: asteroidList } = createAsteroids();
+scene.add(asteroidGroup);
+
+
+/* ============================================================================
+ * 5. X-WING  (placeholder built from primitives)
+ * ---------------------------------------------------------------------------
+ *  To swap in a real model:
+ *    1. Uncomment the GLTFLoader import at the top of this file.
+ *    2. Comment out the entire "PLACEHOLDER" block below.
+ *    3. Uncomment the "REAL MODEL" block.
+ *  Everything downstream (position/rotation tweens) targets the outer
+ *  `xwing` group, so no other code needs to change.
+ * ==========================================================================*/
+function createXWingPlaceholder() {
+  const g = new THREE.Group();
+  g.name = 'xwing';
+
+  /* ---- Materials ---------------------------------------------------------*/
+  const hullMat = new THREE.MeshStandardMaterial({
+    color: 0xd8dce2, metalness: 0.9, roughness: 0.35
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x2a2e36, metalness: 0.85, roughness: 0.4
+  });
+  const trimMat = new THREE.MeshStandardMaterial({
+    color: 0x9a2530, metalness: 0.6, roughness: 0.5
+  });
+  const canopyMat = new THREE.MeshPhysicalMaterial({
+    color: 0x88ccff, metalness: 0.0, roughness: 0.05,
+    transmission: 0.75, transparent: true, opacity: 0.55,
+    thickness: 0.4, ior: 1.45,
+    clearcoat: 1.0, clearcoatRoughness: 0.05,
+    side: THREE.DoubleSide
+  });
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0xffb060, fog: false, toneMapped: false, transparent: true, opacity: 1
+  });
+
+  /* ---- Fuselage ----------------------------------------------------------*/
+  // Main body cylinder (rotated so its length runs along +z)
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 5.0, 12), hullMat);
+  body.rotation.x = Math.PI / 2;
+  body.position.z = 1.5;
+  g.add(body);
+
+  // Rear engine block
+  const rear = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 1.8, 12), darkMat);
+  rear.rotation.x = Math.PI / 2;
+  rear.position.z = -1.9;
+  g.add(rear);
+
+  // Pointed nose cone (default cone points +y → rotate to point +z)
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.8, 12), hullMat);
+  nose.rotation.x = Math.PI / 2;
+  nose.position.z = 4.9;
+  g.add(nose);
+
+  // Red stripe near the nose
+  const trim = new THREE.Mesh(new THREE.CylinderGeometry(0.51, 0.51, 0.25, 12), trimMat);
+  trim.rotation.x = Math.PI / 2;
+  trim.position.z = 3.9;
+  g.add(trim);
+
+  /* ---- Transparent cockpit canopy ----------------------------------------*/
+  const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.48, 20, 14), canopyMat);
+  canopy.scale.set(1.0, 0.75, 2.4);
+  canopy.position.set(0, 0.42, 2.0);
+  g.add(canopy);
+
+  /* ---- Four S-foils + four engine nacelles -------------------------------*/
+  const engineGlows = [];
+
+  for (const sx of [-1, 1]) {
+    for (const sy of [-1, 1]) {
+      // Engine nacelle at the wing root
+      const nac = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.34, 2.6, 10),
+        darkMat
+      );
+      nac.rotation.x = Math.PI / 2;
+      nac.position.set(sx * 0.85, sy * 0.55, -2.0);
+      g.add(nac);
+
+      // Light-coloured intake cap at the front of the nacelle
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.30, 0.30, 10), hullMat);
+      cap.rotation.x = Math.PI / 2;
+      cap.position.set(sx * 0.85, sy * 0.55, -0.8);
+      g.add(cap);
+
+      // Glowing engine exhaust disc (faces -z, i.e. backwards)
+      const glow = new THREE.Mesh(new THREE.CircleGeometry(0.28, 14), glowMat.clone());
+      glow.position.set(sx * 0.85, sy * 0.55, -3.31);
+      glow.rotation.y = Math.PI;
+      g.add(glow);
+      engineGlows.push(glow);
+
+      // Point light for the engine glow
+      const eLight = new THREE.PointLight(0xff8844, 1.4, 7, 2);
+      eLight.position.set(sx * 0.85, sy * 0.55, -3.4);
+      g.add(eLight);
+
+      // The S-foil itself (long thin box, angled outward)
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.09, 1.4), hullMat);
+      wing.position.set(sx * 2.4, sy * 1.45, -2.0);
+      wing.rotation.z = sx * sy * 0.42;   // dihedral angle
+      g.add(wing);
+
+      // Red stripe near the wing tip
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.12, 1.42), trimMat);
+      stripe.position.set(sx * 3.55, sy * 2.11, -2.0);
+      stripe.rotation.z = sx * sy * 0.42;
+      g.add(stripe);
+    }
+  }
+
+  // Central rear plate that ties the rear together
+  const rearBlock = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.0, 0.6), darkMat);
+  rearBlock.position.set(0, 0, -2.9);
+  g.add(rearBlock);
+
+  g.userData.engineGlows = engineGlows;
+  return g;
+}
+
+/* ---- Build the ship ----------------------------------------------------*/
+const xwing = createXWingPlaceholder();
+
+/* ---- REAL MODEL (uncomment and remove the placeholder above) -----------*/
+/*
+const xwing = new THREE.Group();
+xwing.name = 'xwing';
+const loader = new GLTFLoader();
+loader.load('./assets/low_poly_x-wing.glb', (gltf) => {
+  const model = gltf.scene;
+
+  // Auto-fit the model into a ~4-unit-long ship and centre it on origin
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  const scale = 4 / Math.max(size.x, size.y, size.z);
+  model.scale.setScalar(scale);
+
+  box.setFromObject(model);
+  const center = box.getCenter(new THREE.Vector3());
+  model.position.sub(center);
+
+  // Prep materials for the space lighting
+  model.traverse((o) => {
+    if (o.isMesh) {
+      o.castShadow = o.receiveShadow = true;
+      if (o.material) o.material.envMapIntensity = 0.8;
+    }
+  });
+
+  xwing.add(model);
+});
+*/
+
+/* ---- Initial transform -------------------------------------------------*/
+// Nose points +z, so the ship faces the camera at scroll = 0.
+xwing.position.set(0, -6, -95);
+xwing.rotation.set(0, 0, 0);
+scene.add(xwing);
+
+
+/* ============================================================================
+ * 6. SCROLL-DRIVEN ANIMATION
+ * ---------------------------------------------------------------------------
+ *  GSAP timeline scrubbed by ScrollTrigger.
+ *  Progress mapping:
+ *    0.00 – 0.40  Approach   →  ship flies in from the void
+ *    0.40 – 0.60  Flyby      →  ship banks hard, swoops past the camera
+ *    0.60 – 1.00  Fly away   →  ship curls away into the distance
+ * ==========================================================================*/
+function buildScrollTimeline() {
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: document.body,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1.2,             // smooth scrubbing with a little lag
+      invalidateOnRefresh: true
+    }
+  });
+
+  /* ---- PHASE 1 — APPROACH (0.00 → 0.40) --------------------------------*/
+  // Drift from far away toward the camera, rising slightly, staying level.
+  tl.to(xwing.position, {
+    x: 0, y: 0, z: -10, duration: 0.40, ease: 'power1.inOut'
+  }, 0);
+  tl.to(xwing.rotation, {
+    x: 0, y: 0.05, z: -0.05, duration: 0.40, ease: 'power1.inOut'
+  }, 0);
+
+  /* ---- PHASE 2 — DRAMATIC FLYBY (0.40 → 0.60) --------------------------*/
+  // Ship swings very close to the camera, shifting to the right and down,
+  // with a strong banking roll.
+  tl.to(xwing.position, {
+    x: 6, y: -5, z: 5, duration: 0.20, ease: 'power2.in'
+  }, 0.40);
+  tl.to(xwing.rotation, {
+    x: 0.20, y: 0.90, z: -1.70, duration: 0.20, ease: 'power2.in'
+  }, 0.40);
+
+  /* ---- PHASE 3 — FLY AWAY (0.60 → 1.00) --------------------------------*/
+  // Ship curls up and away into the far distance, levelling out.
+  tl.to(xwing.position, {
+    x: 45, y: 25, z: -140, duration: 0.40, ease: 'power1.out'
+  }, 0.60);
+  tl.to(xwing.rotation, {
+    x: -0.15, y: 2.30, z: -0.40, duration: 0.40, ease: 'power1.out'
+  }, 0.60);
+
+  return tl;
+}
+buildScrollTimeline();
+
+
+/* ============================================================================
+ * 7. RESIZE HANDLER
+ * ==========================================================================*/
+function onResize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  ScrollTrigger.refresh();
+}
+window.addEventListener('resize', onResize);
+
+
+/* ============================================================================
+ * 8. RENDER LOOP
+ * ==========================================================================*/
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const dt = clock.getDelta();
+  const t  = clock.getElapsedTime();
+
+  // Slowly spin each asteroid around its own axis
+  for (const rock of asteroidList) {
+    const s = rock.userData.spin;
+    rock.rotation.x += s.x * dt;
+    rock.rotation.y += s.y * dt;
+    rock.rotation.z += s.z * dt;
+  }
+
+  // Subtle engine glow pulse (each of the four is slightly out of phase)
+  const glows = xwing.userData.engineGlows || [];
+  for (let i = 0; i < glows.length; i++) {
+    glows[i].material.opacity = 0.75 + 0.25 * Math.sin(t * 8 + i * 1.7);
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
