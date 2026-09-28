@@ -1,6 +1,6 @@
 # X-Wing — A Rebel Flight
 
-![X-Wing cinematic scroll experience](./screenshots/hero.png)
+![X-Wing cinematic scroll experience](./hero.png)
 
 > A cinematic, scroll-driven 3D X-Wing experience. Watch the ship dive out of deep space, fill the frame, whip past the lens, then vanish into a distant spiral galaxy.
 
