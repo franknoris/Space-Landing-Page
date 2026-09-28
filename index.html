@@ -17,6 +17,8 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html { scroll-behavior: auto; }
+
   html, body {
     background: var(--bg);
     color: var(--text);
@@ -55,7 +57,6 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* Cinematic flash on flyby */
   .flash {
     position: fixed;
     inset: 0;
@@ -127,10 +128,7 @@
     50%      { opacity: 1;   transform: scaleX(1);   }
   }
 
-  main {
-    position: relative;
-    z-index: 5;
-  }
+  main { position: relative; z-index: 5; }
 
   section {
     min-height: 100vh;
@@ -231,10 +229,94 @@
     max-width: none;
   }
 
+  /* ----------------------------------------------------------------
+   * AUTOPLAY UI — a subtle "Auto-flight" badge while it plays, and a
+   * "Replay" pill once it finishes (or the user takes over).
+   * ---------------------------------------------------------------- */
+  .autoplay-badge {
+    position: fixed;
+    left: 50%;
+    bottom: 1.6rem;
+    transform: translateX(-50%) translateY(0);
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 1.1rem;
+    background: rgba(10, 15, 30, 0.65);
+    border: 1px solid rgba(122, 208, 255, 0.35);
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #cfe2ff;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    pointer-events: none;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .autoplay-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #7ad0ff;
+    box-shadow: 0 0 10px #7ad0ff, 0 0 20px rgba(122, 208, 255, 0.5);
+    animation: badge-pulse 1.3s ease-in-out infinite;
+  }
+
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 0.35; transform: scale(0.8); }
+    50%      { opacity: 1;    transform: scale(1);   }
+  }
+
+  .replay-btn {
+    position: fixed;
+    left: 50%;
+    bottom: 1.6rem;
+    transform: translateX(-50%) translateY(0);
+    z-index: 25;
+    padding: 0.65rem 1.35rem;
+    background: rgba(10, 15, 30, 0.65);
+    border: 1px solid rgba(122, 208, 255, 0.5);
+    border-radius: 999px;
+    color: #cfe2ff;
+    font-family: inherit;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease,
+                background 0.25s ease, border-color 0.25s ease;
+    outline: none;
+  }
+
+  .replay-btn:hover {
+    background: rgba(30, 45, 80, 0.85);
+    border-color: rgba(122, 208, 255, 0.95);
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  .replay-btn:active {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* A single class that hides / shows either UI element */
+  .ui-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateX(-50%) translateY(8px) !important;
+  }
+
   @media (max-width: 640px) {
     .topbar { padding: 1rem 1.25rem; }
     section { padding: 10vh 6vw; }
     p { max-width: 28ch; }
+    .autoplay-badge, .replay-btn { bottom: 1.1rem; }
   }
 </style>
 </head>
@@ -248,11 +330,11 @@
 
 <header class="topbar">
   <div class="logo">Rebel Flight · X-Wing</div>
-  <div class="scroll-hint">Scroll to fly</div>
+  <div class="scroll-hint">Scroll</div>
 </header>
 
 <main>
-  <!-- 01 — HERO ------------------------------------------------------------>
+  <!-- 01 — HERO -->
   <section class="center">
     <div class="kicker">A rebel flight</div>
     <h1>X-Wing</h1>
@@ -260,34 +342,40 @@
     <div class="cta">Scroll to launch</div>
   </section>
 
-  <!-- 02 — INBOUND ---------------------------------------------------------->
+  <!-- 02 — INBOUND -->
   <section class="left">
     <div class="kicker">01 — Inbound</div>
     <h2>Do you hear that?</h2>
     <p>Not thunder. Not wind. That's a hyperdrive venting its last breath. She's here.</p>
   </section>
 
-  <!-- 03 — CONTACT ---------------------------------------------------------->
+  <!-- 03 — CONTACT -->
   <section class="right">
     <div class="kicker">02 — Contact</div>
     <h2>Close enough<br>to count rivets.</h2>
     <p>Four engines. One pilot. And a whole sky between you and the next breath.</p>
   </section>
 
-  <!-- 04 — TRAIL ------------------------------------------------------------>
+  <!-- 04 — TRAIL -->
   <section class="left">
     <div class="kicker">03 — Trail</div>
     <h2>And then — gone.</h2>
     <p>She banks hard, drops her nose, and falls into the dark like she owns it. Because she does.</p>
   </section>
 
-  <!-- 05 — FINALE ----------------------------------------------------------->
+  <!-- 05 — FINALE -->
   <section class="center final">
     <div class="kicker">Clear to engage</div>
     <h2>Punch it.</h2>
     <p class="accent">Into the stars.</p>
   </section>
 </main>
+
+<!-- Autoplay UI ------------------------------------------------------->
+<div class="autoplay-badge ui-hidden" id="autoplayBadge">
+  <span class="dot"></span> Auto-flight
+</div>
+<button class="replay-btn ui-hidden" id="replayBtn" type="button">↻ Replay flight</button>
 
 <script type="importmap">
 {
@@ -303,17 +391,20 @@
 
 <script type="module">
 /* ============================================================================
- * X-WING — CINEMATIC SCROLL EXPERIENCE  (v2 — brighter, slower flyby)
+ * X-WING — CINEMATIC SCROLL EXPERIENCE  (v4 — autoplay)
  * ---------------------------------------------------------------------------
- * Flight phases map 1:1 to scroll progress 0 → 1:
+ *  Phases (scroll progress 0 → 1):
+ *    0.00 → 0.28  APPROACH    ship rockets in from deep space — FAST
+ *    0.28 → 0.52  THE MOMENT  ship hangs huge in frame — SLOW
+ *    0.52 → 0.82  WHIP PAST   ship slides past the lens, camera banks — SLOW
+ *    0.82 → 1.00  BLAST AWAY  into the void — FAST
  *
- *   0.00 → 0.28  APPROACH   Ship rockets in from deep space — FAST.
- *   0.28 → 0.52  THE MOMENT Ship fills the frame, hangs there — SLOW & DRAMATIC.
- *   0.52 → 0.82  WHIP PAST  Ship slides past the lens, camera banks — SLOW & COOL.
- *   0.82 → 1.00  BLAST AWAY Into the void — FAST.
- *
- * The camera ALWAYS looks at the ship, so its rotation happens automatically
- * as the ship's world position sweeps from -Z (ahead) to +X,+Y (past and up).
+ *  Autoplay:
+ *    On load, GSAP smoothly scrolls the page from top to bottom over ~22 s.
+ *    This drives ScrollTrigger natively — no separate animation needed.
+ *    Any real user input (wheel, touch, key, pointer) hands control back
+ *    instantly. A small badge appears while auto-flying; a replay button
+ *    appears when it finishes (or the user takes over early).
  * ==========================================================================*/
 
 import * as THREE from 'three';
@@ -327,6 +418,13 @@ const canvas      = document.getElementById('scene');
 const progressBar = document.getElementById('progress');
 const flashEl     = document.getElementById('flash');
 
+const autoplayBadge = document.getElementById('autoplayBadge');
+const replayBtn     = document.getElementById('replayBtn');
+
+// Respect OS-level reduced-motion. We still allow manual scroll, but we
+// disable autoplay and soften the flash / camera shake.
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
@@ -337,7 +435,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x000008, 1);
 renderer.toneMapping        = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.45;   // brighter overall
+renderer.toneMappingExposure = 1.45;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000008);
@@ -353,7 +451,7 @@ camera.position.set(0, 2, 14);
 camera.lookAt(0, 0, 0);
 
 /* ============================================================================
- * 2. LIGHTING  (brighter across the board)
+ * 2. LIGHTING
  * ==========================================================================*/
 scene.add(new THREE.AmbientLight(0x3a4c70, 0.75));
 
@@ -370,7 +468,7 @@ fill.position.set(0, -20, 30);
 scene.add(fill);
 
 /* ============================================================================
- * 3. NEBULA GLOW  (large additive sprite behind everything — adds depth)
+ * 3. NEBULA GLOW
  * ==========================================================================*/
 function createNebula() {
   const c = document.createElement('canvas');
@@ -403,7 +501,7 @@ function createNebula() {
 scene.add(createNebula());
 
 /* ============================================================================
- * 4. STARFIELD  (5000 bright points + warmer/cooler variation)
+ * 4. STARFIELD
  * ==========================================================================*/
 function createStars() {
   const count     = 5000;
@@ -420,7 +518,6 @@ function createStars() {
     positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
     positions[i * 3 + 2] = r * Math.cos(phi);
 
-    // Cool blues to warm whites — brighter overall
     col.setHSL(
       0.54 + Math.random() * 0.16,
       0.25 + Math.random() * 0.30,
@@ -451,7 +548,7 @@ function createStars() {
 scene.add(createStars());
 
 /* ============================================================================
- * 5. ASTEROIDS  (40 low-poly rocks)
+ * 5. ASTEROIDS
  * ==========================================================================*/
 function createAsteroids() {
   const group = new THREE.Group();
@@ -498,7 +595,10 @@ const { group: asteroidGroup, list: asteroidList } = createAsteroids();
 scene.add(asteroidGroup);
 
 /* ============================================================================
- * 6. X-WING  (placeholder primitives — swap for a .glb easily)
+ * 6. X-WING PLACEHOLDER
+ * ---------------------------------------------------------------------------
+ *  Swap in a real .glb by uncommenting the GLTFLoader import above and
+ *  replacing this block with the loader code (see v3 comments).
  * ==========================================================================*/
 function createXWingPlaceholder() {
   const g = new THREE.Group();
@@ -528,7 +628,6 @@ function createXWingPlaceholder() {
     color: 0xffb070, fog: false, toneMapped: false, transparent: true, opacity: 1
   });
 
-  /* ---- Fuselage -----------------------------------------------------*/
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, 5.0, 14), hullMat);
   body.rotation.x = Math.PI / 2;
   body.position.z = 1.4;
@@ -549,13 +648,11 @@ function createXWingPlaceholder() {
   trim.position.z = 3.75;
   g.add(trim);
 
-  /* ---- Canopy -------------------------------------------------------*/
   const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.46, 22, 16), canopyMat);
   canopy.scale.set(1.0, 0.72, 2.35);
   canopy.position.set(0, 0.4, 1.9);
   g.add(canopy);
 
-  /* ---- Wings + engines ---------------------------------------------*/
   const engineGlows  = [];
   const engineLights = [];
   const engineHalos  = [];
@@ -572,14 +669,12 @@ function createXWingPlaceholder() {
       cap.position.set(sx * 0.82, sy * 0.52, -0.78);
       g.add(cap);
 
-      // Bright exhaust disc
       const glow = new THREE.Mesh(new THREE.CircleGeometry(0.30, 18), glowMat.clone());
       glow.position.set(sx * 0.82, sy * 0.52, -3.22);
       glow.rotation.y = Math.PI;
       g.add(glow);
       engineGlows.push(glow);
 
-      // Soft halo sprite behind the disc (fake bloom)
       const haloCanvas = document.createElement('canvas');
       haloCanvas.width = haloCanvas.height = 128;
       const hctx = haloCanvas.getContext('2d');
@@ -606,13 +701,11 @@ function createXWingPlaceholder() {
       g.add(halo);
       engineHalos.push(halo);
 
-      // Engine point light
       const eLight = new THREE.PointLight(0xffa055, 2.4, 11, 2);
       eLight.position.set(sx * 0.82, sy * 0.52, -3.3);
       g.add(eLight);
       engineLights.push(eLight);
 
-      // Wing
       const wing = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.08, 1.35), hullMat);
       wing.position.set(sx * 2.35, sy * 1.4, -1.95);
       wing.rotation.z = sx * sy * 0.4;
@@ -643,22 +736,23 @@ scene.add(xwing);
 /* ============================================================================
  * 7. SCROLL-DRIVEN CINEMATIC
  * ==========================================================================*/
-const camState = {
-  x: 0, y: 2, z: 14,
-  shake: 0
-};
+const camState = { x: 0, y: 2, z: 14, shake: 0 };
+const fovState = { value: 50 };
 
 const shipState = {
   x: 0, y: 0, z: -110,
   rotX: 0, rotY: 0, rotZ: 0
 };
 
-function applyTransforms(time) {
-  // Camera micro-shake during the flyby (shake is 0 → 1 → 0 via GSAP)
-  const s = camState.shake;
-  const shakeX = s * Math.sin(time * 32) * 0.05;
-  const shakeY = s * Math.cos(time * 27) * 0.05;
+let shakeTick = 0;
 
+function applyTransforms() {
+  const s = reduceMotion ? 0 : camState.shake;
+  const shakeX = s * Math.sin(shakeTick * 1.4) * 0.05;
+  const shakeY = s * Math.cos(shakeTick * 1.15) * 0.05;
+
+  camera.fov = fovState.value;
+  camera.updateProjectionMatrix();
   camera.position.set(camState.x + shakeX, camState.y + shakeY, camState.z);
   camera.lookAt(shipState.x, shipState.y + 0.2, shipState.z);
 
@@ -666,14 +760,6 @@ function applyTransforms(time) {
   xwing.rotation.set(shipState.rotX, shipState.rotY, shipState.rotZ);
 }
 
-/* ---------------------------------------------------------------------------
- * TIMELINE — phases sum to 1.0 for a full 100% scrub.
- *
- *   0.00 → 0.28  APPROACH     (0.28)  fast dive in
- *   0.28 → 0.52  THE MOMENT   (0.24)  SLOW: ship hovers huge in frame
- *   0.52 → 0.82  WHIP PAST    (0.30)  SLOW: ship slides by, camera banks
- *   0.82 → 1.00  BLAST AWAY   (0.18)  fast exit
- * -------------------------------------------------------------------------*/
 function buildScrollTimeline() {
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
@@ -685,107 +771,157 @@ function buildScrollTimeline() {
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         progressBar.style.width = (self.progress * 100) + '%';
+        shakeTick += 1;
 
-        // Cinematic flash when the ship crosses the camera plane (~0.55–0.62)
         const p = self.progress;
-        const flash = Math.max(0, 1 - Math.abs(p - 0.58) / 0.06);
-        flashEl.style.opacity = (flash * 0.55).toFixed(3);
+        let flash = Math.max(0, 1 - Math.abs(p - 0.58) / 0.06);
+        flash = flash * flash * (3 - 2 * flash);
+        flashEl.style.opacity = (reduceMotion ? flash * 0.2 : flash * 0.55).toFixed(3);
       }
     }
   });
 
-  /* ----------------------------------------------------------------
-   * PHASE 1 — APPROACH (0.00 → 0.28)  FAST
-   * Ship rockets from deep space straight to the lens.
-   * ----------------------------------------------------------------*/
+  /* --- APPROACH (0.00 → 0.28) --- */
   tl.to(shipState, {
     x: 0, y: 0.4, z: -12,
     rotX: 0, rotY: 0.02, rotZ: 0.03,
-    duration: 0.28,
-    ease: 'power2.in'
+    duration: 0.28, ease: 'power2.in'
   }, 0);
-
   tl.to(camState, {
     x: 0.4, y: 2.5, z: 12.5,
-    duration: 0.28,
-    ease: 'power1.inOut'
+    duration: 0.28, ease: 'power1.inOut'
   }, 0);
 
-  /* ----------------------------------------------------------------
-   * PHASE 2 — THE MOMENT (0.28 → 0.52)  SLOW
-   * Ship drifts in the last few meters. It fills the frame.
-   * The pilot seems to look straight into your eyes. Time stretches.
-   * ----------------------------------------------------------------*/
+  /* --- THE MOMENT (0.28 → 0.52) --- */
   tl.to(shipState, {
     x: 0.4, y: 0.6, z: 4,
     rotX: 0, rotY: 0.06, rotZ: -0.06,
-    duration: 0.24,
-    ease: 'power2.inOut'
+    duration: 0.24, ease: 'power2.inOut'
   }, 0.28);
-
   tl.to(camState, {
     x: 0.6, y: 2.7, z: 12.2,
-    duration: 0.24,
-    ease: 'power2.inOut'
+    duration: 0.24, ease: 'power2.inOut'
   }, 0.28);
 
-  /* ----------------------------------------------------------------
-   * PHASE 3 — WHIP PAST (0.52 → 0.82)  SLOW + DRAMATIC
-   * The whole "front → behind" moment. Ship slides past the lens,
-   * banking hard. Camera banks with it, tracking from nose to tail.
-   * ----------------------------------------------------------------*/
-  // Ship starts to bank
+  /* --- WHIP PAST (0.52 → 0.82) --- */
   tl.to(shipState, {
     x: 3.5, y: 1.4, z: 12,
     rotX: -0.10, rotY: 0.28, rotZ: -0.30,
-    duration: 0.15,
-    ease: 'power1.inOut'
+    duration: 0.15, ease: 'power1.inOut'
   }, 0.52);
-
-  // Ship crosses the plane, then continues behind
   tl.to(shipState, {
     x: 14, y: 3.8, z: 30,
     rotX: -0.35, rotY: 0.85, rotZ: -0.85,
-    duration: 0.15,
-    ease: 'power1.out'
+    duration: 0.15, ease: 'power1.out'
   }, 0.67);
-
-  // Camera banks along with it, drifting sideways
   tl.to(camState, {
     x: 1.0, y: 3.0, z: 11.5,
-    duration: 0.30,
-    ease: 'power1.inOut'
+    duration: 0.30, ease: 'power1.inOut'
   }, 0.52);
 
-  // Camera shake peaks right as the ship crosses (peaks at 0.67)
   tl.to(camState, { shake: 1, duration: 0.08, ease: 'power2.out' }, 0.58);
   tl.to(camState, { shake: 0, duration: 0.16, ease: 'power2.in'  }, 0.70);
 
-  /* ----------------------------------------------------------------
-   * PHASE 4 — BLAST AWAY (0.82 → 1.00)  FAST
-   * Ship rockets off into the void. Camera holds, watching the trail.
-   * ----------------------------------------------------------------*/
+  tl.to(fovState, { value: 64, duration: 0.08, ease: 'power2.in'  }, 0.55);
+  tl.to(fovState, { value: 50, duration: 0.20, ease: 'power2.out' }, 0.63);
+
+  /* --- BLAST AWAY (0.82 → 1.00) --- */
   tl.to(shipState, {
     x: 90, y: 55, z: 95,
     rotX: -0.75, rotY: 1.55, rotZ: -0.25,
-    duration: 0.18,
-    ease: 'power3.out'
+    duration: 0.18, ease: 'power3.out'
   }, 0.82);
-
   tl.to(camState, {
     x: 1.4, y: 3.3, z: 9.5,
-    duration: 0.18,
-    ease: 'power2.out'
+    duration: 0.18, ease: 'power2.out'
   }, 0.82);
 
   return tl;
 }
 
 buildScrollTimeline();
-applyTransforms(0);
+applyTransforms();
 
 /* ============================================================================
- * 8. RESIZE HANDLER
+ * 8. AUTOPLAY
+ * ---------------------------------------------------------------------------
+ *  On load, we tween a proxy { t: 0 → 1 } over 22 s and drive
+ *  window.scrollTo() from its value. ScrollTrigger sees real scrolling,
+ *  so the whole existing scroll timeline plays back — same code path,
+ *  no duplicate animation logic.
+ *
+ *  Any deliberate user input (wheel / touch / key / pointer) instantly
+ *  cancels the auto-scroll and hands the page back to them.
+ *
+ *  Reduced-motion users get a static page (no autoplay at all).
+ * ==========================================================================*/
+const AUTOPLAY_SECONDS = 22;
+
+let autoTween  = null;
+let autoActive = false;
+
+function startAutoplay() {
+  if (reduceMotion) return;
+
+  // Restart cleanly from the top
+  window.scrollTo(0, 0);
+
+  const proxy = { t: 0 };
+
+  autoActive = true;
+  autoplayBadge.classList.remove('ui-hidden');
+  replayBtn.classList.add('ui-hidden');
+
+  autoTween = gsap.to(proxy, {
+    t: 1,
+    duration: AUTOPLAY_SECONDS,
+    ease: 'none',
+    onUpdate: () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      window.scrollTo(0, proxy.t * max);
+    },
+    onComplete: () => {
+      autoActive = false;
+      autoTween  = null;
+      autoplayBadge.classList.add('ui-hidden');
+      replayBtn.classList.remove('ui-hidden');
+    }
+  });
+}
+
+function cancelAutoplay() {
+  if (!autoActive) return;
+  autoActive = false;
+  if (autoTween) autoTween.kill();
+  autoTween = null;
+  autoplayBadge.classList.add('ui-hidden');
+  replayBtn.classList.remove('ui-hidden');
+}
+
+// Any genuine user input hands control back instantly.
+// We ignore events on the replay button itself so the click that kicks off
+// a new flight doesn't immediately cancel it.
+['wheel', 'touchstart', 'keydown', 'pointerdown', 'mousedown'].forEach((evt) => {
+  window.addEventListener(evt, (e) => {
+    if (e.target && (e.target === replayBtn || replayBtn.contains(e.target))) return;
+    cancelAutoplay();
+  }, { passive: true });
+});
+
+// Kick off autoplay once the page has painted. A short delay lets the first
+// WebGL frame render so the flight never starts on a blank canvas.
+window.addEventListener('load', () => {
+  setTimeout(startAutoplay, 550);
+});
+
+// Replay button — start a fresh flight from the top.
+replayBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  startAutoplay();
+});
+
+/* ============================================================================
+ * 9. RESIZE HANDLER
  * ==========================================================================*/
 function onResize() {
   const w = window.innerWidth;
@@ -802,7 +938,7 @@ function onResize() {
 window.addEventListener('resize', onResize);
 
 /* ============================================================================
- * 9. RENDER LOOP
+ * 10. RENDER LOOP
  * ==========================================================================*/
 const clock = new THREE.Clock();
 
@@ -812,9 +948,8 @@ function animate() {
   const dt = clock.getDelta();
   const t  = clock.getElapsedTime();
 
-  applyTransforms(t);
+  applyTransforms();
 
-  // Rotate asteroids
   for (const rock of asteroidList) {
     const s = rock.userData.spin;
     rock.rotation.x += s.x * dt;
@@ -822,7 +957,6 @@ function animate() {
     rock.rotation.z += s.z * dt;
   }
 
-  // Pulsing engine glow + halo (out of phase across the four engines)
   const glows  = xwing.userData.engineGlows  || [];
   const lights = xwing.userData.engineLights || [];
   const halos  = xwing.userData.engineHalos  || [];
