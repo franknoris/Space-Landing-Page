@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>X-Wing — A Rebel Flight</title>
-<meta name="description" content="A cinematic scroll-driven flight. Watch the X-Wing come straight at you, fill the frame, then whip past — into the heart of a distant galaxy." />
+<meta name="description" content="A cinematic scroll-driven flight. Watch the X-Wing come straight at you, fill the frame, whip past, then vanish into the heart of a distant spiral galaxy." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,71 +33,49 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* ============================================================
-   * CANVAS + OVERLAYS
-   * ========================================================== */
   #scene {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
+    position: fixed; inset: 0;
+    width: 100vw; height: 100vh;
     display: block;
     pointer-events: none;
     z-index: 0;
   }
 
   .vignette {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 2;
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 2;
     background:
-      radial-gradient(ellipse 75% 65% at 50% 45%, transparent 45%, rgba(0,0,8,0.6) 100%),
-      linear-gradient(to bottom, rgba(0,0,8,0.35) 0%, transparent 20%, transparent 80%, rgba(0,0,8,0.65) 100%);
+      radial-gradient(ellipse 75% 65% at 50% 45%, transparent 45%, rgba(0,0,8,0.62) 100%),
+      linear-gradient(to bottom, rgba(0,0,8,0.35) 0%, transparent 20%, transparent 80%, rgba(0,0,8,0.7) 100%);
   }
 
   .grain {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 3;
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 3;
     opacity: 0.05;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   .flash {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 4;
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 4;
     background: radial-gradient(circle at 50% 50%, rgba(190,220,255,0.4), transparent 65%);
     opacity: 0;
     will-change: opacity;
   }
 
-  /* ============================================================
-   * PROGRESS BAR + TOPBAR
-   * ========================================================== */
   .progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 2px;
-    width: 0%;
+    position: fixed; top: 0; left: 0;
+    height: 2px; width: 0%;
     background: linear-gradient(90deg, var(--accent), var(--accent-hot));
     z-index: 20;
     box-shadow: 0 0 14px rgba(122, 208, 255, 0.8);
   }
 
   .topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: fixed; top: 0; left: 0; right: 0;
     z-index: 15;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
     padding: 1.6rem 2.4rem;
     pointer-events: none;
     mix-blend-mode: difference;
@@ -105,32 +83,22 @@
 
   .logo {
     font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: #fff;
-    opacity: 0.9;
+    font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 0.4em; text-transform: uppercase;
+    color: #fff; opacity: 0.9;
   }
 
   .scroll-hint {
     font-family: var(--font-display);
-    font-size: 0.6rem;
-    font-weight: 500;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: #fff;
-    opacity: 0.65;
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
+    font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    color: #fff; opacity: 0.65;
+    display: flex; align-items: center; gap: 0.7rem;
   }
 
   .scroll-hint::after {
-    content: "";
-    display: block;
-    width: 26px;
-    height: 1px;
+    content: ""; display: block;
+    width: 26px; height: 1px;
     background: currentColor;
     animation: pulse-line 1.9s ease-in-out infinite;
     transform-origin: left center;
@@ -141,16 +109,11 @@
     50%      { opacity: 1;   transform: scaleX(1);   }
   }
 
-  /* ============================================================
-   * CONTENT LAYER
-   * ========================================================== */
   main { position: relative; z-index: 5; }
 
   section {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: flex; flex-direction: column; justify-content: center;
     padding: 14vh 8vw;
     pointer-events: none;
   }
@@ -159,33 +122,27 @@
   .left   { align-items: flex-start; text-align: left; }
   .right  { align-items: flex-end;   text-align: right; }
 
-  /* ---------------- Kicker ---------------- */
   .kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.9rem;
+    display: inline-flex; align-items: center; gap: 0.9rem;
     margin-bottom: 1.6rem;
     font-family: var(--font-display);
     font-size: clamp(0.68rem, 1vw, 0.78rem);
     font-weight: 500;
-    letter-spacing: 0.42em;
-    text-transform: uppercase;
+    letter-spacing: 0.42em; text-transform: uppercase;
     color: var(--accent);
+    will-change: transform;
   }
 
   .kicker .line {
     display: inline-block;
-    width: 46px;
-    height: 1px;
-    background: currentColor;
-    opacity: 0.7;
+    width: 46px; height: 1px;
+    background: currentColor; opacity: 0.7;
     transform-origin: left center;
   }
 
   .right .kicker { flex-direction: row-reverse; }
   .right .kicker .line { transform-origin: right center; }
 
-  /* ---------------- HERO TITLE ---------------- */
   .hero-title {
     font-family: var(--font-display);
     font-weight: 700;
@@ -198,93 +155,73 @@
     margin-bottom: 0.15em;
   }
 
-  .hero-title span {
+  .hero-title .wm {
+    display: inline-block; overflow: hidden;
+    vertical-align: bottom;
+    padding-bottom: 0.14em; margin-bottom: -0.14em;
+  }
+  .hero-title .wi {
     display: inline-block;
-    background: linear-gradient(180deg, #ffffff 15%, #a4c8f2 60%, #6ea4e0 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
+    background: linear-gradient(180deg, #ffffff 12%, #a4c8f2 60%, #6ea4e0 100%);
+    -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
     will-change: transform;
     filter: drop-shadow(0 8px 60px rgba(110, 190, 255, 0.55));
   }
 
-  /* ---------------- SECTION HEADINGS ---------------- */
   h2 {
     font-family: var(--font-display);
     font-weight: 600;
     font-size: clamp(2.2rem, 7.2vw, 5rem);
-    letter-spacing: -0.03em;
-    line-height: 0.98;
+    letter-spacing: -0.03em; line-height: 0.98;
     text-shadow:
       0 2px 24px rgba(0,0,0,0.95),
       0 0 80px rgba(110, 190, 255, 0.35);
   }
 
-  /* Word mask + inner for the reveal animation */
   .wm {
-    display: inline-block;
-    overflow: hidden;
+    display: inline-block; overflow: hidden;
     vertical-align: bottom;
-    padding-bottom: 0.14em;
-    margin-bottom: -0.14em;
+    padding-bottom: 0.14em; margin-bottom: -0.14em;
   }
-  .wi {
-    display: inline-block;
-    will-change: transform;
-  }
+  .wi { display: inline-block; will-change: transform; }
 
-  /* ---------------- PARAGRAPH ---------------- */
   p {
     max-width: 40ch;
     margin-top: 1.6rem;
     font-family: var(--font-body);
     font-size: clamp(1rem, 1.45vw, 1.2rem);
     font-weight: 300;
-    line-height: 1.7;
-    letter-spacing: 0.005em;
+    line-height: 1.7; letter-spacing: 0.005em;
     color: var(--muted);
     text-shadow: 0 2px 20px rgba(0,0,0,0.95);
-    will-change: transform, opacity;
+    will-change: transform, opacity, filter;
   }
 
-  .center p {
-    max-width: 48ch;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  .center p { max-width: 48ch; margin-left: auto; margin-right: auto; }
 
   .accent { color: var(--accent); }
 
-  /* ---------------- CTA ---------------- */
   .cta {
     margin-top: 2.8rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.9rem;
+    display: inline-flex; align-items: center; gap: 0.9rem;
     font-family: var(--font-display);
-    font-size: 0.66rem;
-    font-weight: 500;
-    letter-spacing: 0.44em;
-    text-transform: uppercase;
-    color: var(--muted);
-    opacity: 0.9;
+    font-size: 0.66rem; font-weight: 500;
+    letter-spacing: 0.44em; text-transform: uppercase;
+    color: var(--muted); opacity: 0.9;
+    will-change: transform, opacity;
   }
 
   .cta::before {
-    content: "";
-    width: 34px;
-    height: 1px;
-    background: currentColor;
-    opacity: 0.7;
+    content: ""; width: 34px; height: 1px;
+    background: currentColor; opacity: 0.7;
   }
 
-  /* ---------------- FINALE ---------------- */
-  .final { min-height: 120vh; }
+  .final { min-height: 125vh; }
 
   .final h2 {
     font-size: clamp(3rem, 10vw, 7.5rem);
-    font-weight: 700;
-    letter-spacing: -0.04em;
+    font-weight: 700; letter-spacing: -0.04em;
     text-shadow:
       0 2px 30px rgba(0,0,0,0.95),
       0 0 100px rgba(255, 154, 85, 0.5),
@@ -293,57 +230,37 @@
 
   .final p {
     font-size: clamp(1.05rem, 1.6vw, 1.4rem);
-    font-weight: 400;
-    color: #cfdcf4;
-    letter-spacing: 0.01em;
-    max-width: none;
+    font-weight: 400; color: #cfdcf4;
+    letter-spacing: 0.01em; max-width: none;
   }
 
-  /* ============================================================
-   * AUTOPLAY UI
-   * ========================================================== */
-  .autoplay-badge,
-  .replay-btn {
-    position: fixed;
-    left: 50%;
-    bottom: 1.8rem;
+  .autoplay-badge, .replay-btn {
+    position: fixed; left: 50%; bottom: 1.8rem;
     transform: translateX(-50%);
     z-index: 25;
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
+    display: flex; align-items: center; gap: 0.7rem;
     padding: 0.65rem 1.25rem;
     background: rgba(10, 15, 30, 0.6);
     border: 1px solid rgba(122, 208, 255, 0.35);
     border-radius: 999px;
     font-family: var(--font-display);
-    font-size: 0.6rem;
-    font-weight: 500;
-    letter-spacing: 0.36em;
-    text-transform: uppercase;
+    font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.36em; text-transform: uppercase;
     color: #cfe2ff;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     transition: opacity 0.6s ease, transform 0.6s ease,
                 background 0.25s ease, border-color 0.25s ease;
-    outline: none;
-    pointer-events: none;
+    outline: none; pointer-events: none;
   }
 
-  .replay-btn {
-    cursor: pointer;
-    font-family: var(--font-display);
-  }
-
+  .replay-btn { cursor: pointer; }
   .replay-btn:hover {
     background: rgba(30, 45, 80, 0.85);
     border-color: rgba(122, 208, 255, 0.95);
   }
 
   .autoplay-badge .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
+    width: 6px; height: 6px; border-radius: 50%;
     background: #7ad0ff;
     box-shadow: 0 0 10px #7ad0ff, 0 0 22px rgba(122, 208, 255, 0.6);
     animation: badge-pulse 1.4s ease-in-out infinite;
@@ -362,9 +279,6 @@
 
   .replay-btn:not(.ui-hidden) { pointer-events: auto; }
 
-  /* ============================================================
-   * RESPONSIVE
-   * ========================================================== */
   @media (max-width: 640px) {
     .topbar { padding: 1rem 1.25rem; }
     section { padding: 12vh 6vw; }
@@ -388,36 +302,31 @@
 </header>
 
 <main>
-  <!-- 01 · HERO ============================================ -->
   <section class="center">
     <div class="kicker"><span class="line"></span>A Rebel Flight</div>
-    <h1 class="hero-title"><span>X-Wing</span></h1>
+    <h1 class="hero-title" data-split-chars>X-Wing</h1>
     <p>The last thing the Empire ever saw coming. Nineteen meters of stubborn hope, held together by wire and nerve.</p>
     <div class="cta">Scroll to launch</div>
   </section>
 
-  <!-- 02 · INBOUND ========================================= -->
   <section class="left">
     <div class="kicker"><span class="line"></span>01 · Inbound</div>
     <h2 data-split>Do you hear that?</h2>
     <p>Not thunder. Not wind. That's a hyperdrive holding its breath.</p>
   </section>
 
-  <!-- 03 · CONTACT ========================================= -->
   <section class="right">
     <div class="kicker"><span class="line"></span>02 · Contact</div>
     <h2 data-split>Close enough<br>to count rivets.</h2>
     <p>Four engines. One pilot. And a sky between you and the next breath.</p>
   </section>
 
-  <!-- 04 · TRAIL =========================================== -->
   <section class="left">
     <div class="kicker"><span class="line"></span>03 · Trail</div>
     <h2 data-split>And then — gone.</h2>
     <p>She banks hard, drops her nose, and falls into the dark like she owns it.</p>
   </section>
 
-  <!-- 05 · FINALE ========================================== -->
   <section class="center final">
     <div class="kicker"><span class="line"></span>Clear to Engage</div>
     <h2 data-split>Punch it.</h2>
@@ -425,15 +334,11 @@
   </section>
 </main>
 
-<!-- Autoplay UI -->
 <div class="autoplay-badge ui-hidden" id="autoplayBadge">
   <span class="dot"></span> Auto-flight
 </div>
 <button class="replay-btn ui-hidden" id="replayBtn" type="button">↻ Replay flight</button>
 
-<!-- ============================================================
-     LIBRARIES
-     ========================================================== -->
 <script type="importmap">
 {
   "imports": {
@@ -448,31 +353,34 @@
 
 <script type="module">
 /* ============================================================================
- * X-WING — CINEMATIC SCROLL EXPERIENCE  (v5)
+ * X-WING — CINEMATIC SCROLL EXPERIENCE  (v7 — silky autoplay)
  * ---------------------------------------------------------------------------
- *  Flight phases (scroll 0 → 1):
- *    0.00 → 0.28  APPROACH    rocket in from deep space
- *    0.28 → 0.52  THE MOMENT  ship hangs huge in frame
- *    0.52 → 0.82  WHIP PAST   ship slides past the lens, camera banks
- *    0.82 → 1.00  BLAST AWAY  into a spiral galaxy that dominates the finale
- *
- *  New in v5:
- *    • Twinkling stars via custom ShaderMaterial (per-star speed & phase)
- *    • Procedural spiral galaxy, differential rotation via shader
- *    • Space Grotesk + Inter typography, word-mask heading reveals
- *    • Autoplay, replay button, progress bar, cinematic flash
+ *  What's new in v7:
+ *    • Autoplay now tweens the timeline's progress DIRECTLY, bypassing
+ *      ScrollTrigger's scrub smoothing. No more rubber-banding or micro-
+ *      pauses — the flight plays at a perfectly even rate.
+ *    • Velocity-continuous eases: each phase starts at the exact speed the
+ *      previous one ended at, so the ship never stutters between beats.
+ *    • The ship's speed graph is now a clean cinematic arc:
+ *          0 → fast → hold → fast → hold → fast
+ *      (arriving, hanging in frame, whipping past, slowing at the edge,
+ *       then rocketing into the galaxy)
+ *    • Seamless handoff: when autoplay finishes (or the user takes over),
+ *      scroll position is synced to timeline progress and ScrollTrigger
+ *      resumes with zero visual jump.
  * ==========================================================================*/
 
 import * as THREE from 'three';
 
 gsap.registerPlugin(ScrollTrigger);
+gsap.ticker.lagSmoothing(500, 33);
 
 /* ============================================================================
  * 1. SETUP
  * ==========================================================================*/
-const canvas      = document.getElementById('scene');
-const progressBar = document.getElementById('progress');
-const flashEl     = document.getElementById('flash');
+const canvas        = document.getElementById('scene');
+const progressBar   = document.getElementById('progress');
+const flashEl       = document.getElementById('flash');
 const autoplayBadge = document.getElementById('autoplayBadge');
 const replayBtn     = document.getElementById('replayBtn');
 
@@ -487,19 +395,18 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x000008, 1);
-renderer.toneMapping        = THREE.ACESFilmicToneMapping;
+renderer.toneMapping         = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.45;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000008);
-scene.fog = new THREE.FogExp2(0x000008, 0.0012);
+scene.fog = new THREE.FogExp2(0x000008, 0.0011);
 
-// Wider far plane so the distant galaxy never clips
 const camera = new THREE.PerspectiveCamera(
   50,
   window.innerWidth / window.innerHeight,
   0.5,
-  2000
+  2500
 );
 camera.position.set(0, 2, 14);
 camera.lookAt(0, 0, 0);
@@ -522,7 +429,7 @@ fill.position.set(0, -20, 30);
 scene.add(fill);
 
 /* ============================================================================
- * 3. NEBULA GLOW (soft backdrop)
+ * 3. NEBULA GLOW
  * ==========================================================================*/
 function createNebula() {
   const c = document.createElement('canvas');
@@ -532,21 +439,15 @@ function createNebula() {
   g.addColorStop(0.0, 'rgba(120,170,255,0.5)');
   g.addColorStop(0.4, 'rgba(60,100,200,0.2)');
   g.addColorStop(1.0, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 256, 256);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 256);
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
 
   const mat = new THREE.SpriteMaterial({
-    map: tex,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    transparent: true,
-    opacity: 0.5,
-    fog: false
+    map: tex, blending: THREE.AdditiveBlending,
+    depthWrite: false, transparent: true, opacity: 0.5, fog: false
   });
-
   const sprite = new THREE.Sprite(mat);
   sprite.scale.set(420, 420, 1);
   sprite.position.set(60, 40, -260);
@@ -556,9 +457,6 @@ scene.add(createNebula());
 
 /* ============================================================================
  * 4. TWINKLING STARFIELD
- * ---------------------------------------------------------------------------
- *  Custom ShaderMaterial — each star has its own twinkle speed and phase so
- *  the field shimmers organically instead of pulsing in sync.
  * ==========================================================================*/
 const starUniforms = {
   uTime:       { value: 0 },
@@ -567,18 +465,15 @@ const starUniforms = {
 
 function createStars() {
   const count = 5200;
-
   const positions = new Float32Array(count * 3);
   const colors    = new Float32Array(count * 3);
   const sizes     = new Float32Array(count);
   const phases    = new Float32Array(count);
   const twinkles  = new Float32Array(count);
-
-  const col = new THREE.Color();
+  const col       = new THREE.Color();
 
   for (let i = 0; i < count; i++) {
-    // Thick spherical shell
-    const r     = 130 + Math.random() * 420;
+    const r     = 130 + Math.random() * 480;
     const theta = Math.random() * Math.PI * 2;
     const phi   = Math.acos(2 * Math.random() - 1);
 
@@ -586,7 +481,6 @@ function createStars() {
     positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
     positions[i * 3 + 2] = r * Math.cos(phi);
 
-    // Cool blues to warm whites, brighter overall
     col.setHSL(
       0.54 + Math.random() * 0.16,
       0.25 + Math.random() * 0.30,
@@ -596,12 +490,10 @@ function createStars() {
     colors[i * 3 + 1] = col.g;
     colors[i * 3 + 2] = col.b;
 
-    // Star size — a few big bright ones, mostly small
     sizes[i] = Math.random() < 0.06
       ? 2.4 + Math.random() * 2.2
       : 0.6 + Math.random() * 1.0;
 
-    // Each star twinkles on its own clock
     phases[i]   = Math.random() * Math.PI * 2;
     twinkles[i] = 0.6 + Math.random() * 2.6;
   }
@@ -620,50 +512,33 @@ function createStars() {
       attribute float aSize;
       attribute float aPhase;
       attribute float aTwinkle;
-
       uniform float uTime;
       uniform float uPixelRatio;
-
       varying vec3  vColor;
       varying float vTwinkle;
-
       void main() {
         vColor = aColor;
-
-        // Per-star pulse, plus an occasional bright "flare"
         float pulse = sin(uTime * aTwinkle + aPhase);
         float flare = smoothstep(0.88, 1.0, pulse) * 0.9;
         vTwinkle = 0.55 + 0.45 * pulse + flare;
-
         vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-
-        // Size attenuates with distance, modulated by the twinkle
-        gl_PointSize = aSize * uPixelRatio *
-                       (300.0 / -mvPosition.z) *
-                       (0.65 + 0.7 * vTwinkle);
-
+        gl_PointSize = aSize * uPixelRatio * (300.0 / -mvPosition.z) * (0.65 + 0.7 * vTwinkle);
         gl_Position = projectionMatrix * mvPosition;
       }
     `,
     fragmentShader: /* glsl */`
       varying vec3  vColor;
       varying float vTwinkle;
-
       void main() {
         vec2 c = gl_PointCoord - 0.5;
         float d = length(c);
         if (d > 0.5) discard;
-
-        // Soft radial falloff
         float alpha = smoothstep(0.5, 0.0, d);
         alpha = pow(alpha, 1.6);
-
         gl_FragColor = vec4(vColor * (0.7 + 0.7 * vTwinkle), alpha * vTwinkle);
       }
     `,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
   });
 
   const points = new THREE.Points(geo, mat);
@@ -673,78 +548,65 @@ function createStars() {
 scene.add(createStars());
 
 /* ============================================================================
- * 5. SPIRAL GALAXY  (destination)
- * ---------------------------------------------------------------------------
- *  Points arranged along logarithmic spiral arms with a bright warm core.
- *  A custom vertex shader rotates each point at a radius-dependent speed,
- *  which is how real galaxies actually move — inner stars orbit faster
- *  than outer ones. The whole thing therefore has genuine differential
- *  rotation and reads as a live galaxy, not a static sprite.
- *
- *  Positioned so that at the end of the flight the camera is looking
- *  straight down its throat, behind the ship.
+ * 5. SPIRAL GALAXY
  * ==========================================================================*/
 const galaxyUniforms = {
   uTime:       { value: 0 },
   uPixelRatio: { value: renderer.getPixelRatio() },
-  uSize:       { value: 6.5 }
+  uSize:       { value: 5.6 }
 };
 
-function createGalaxy() {
-  const COUNT      = 16000;
-  const RADIUS     = 190;
-  const BRANCHES   = 3;
-  const SPIN       = 2.1;        // how tightly the arms wind
-  const CORE_COLOR = new THREE.Color(0xffe4b0);
-  const MID_COLOR  = new THREE.Color(0x88a8ff);
-  const OUT_COLOR  = new THREE.Color(0x4a3aff);
+function buildGalaxyPoints(config) {
+  const {
+    count, radiusMin, radiusMax, branches, spin,
+    colorInner, colorMid, colorOuter,
+    thicknessFactor, armWidth, sizeBase, sizeVar, isBulge
+  } = config;
 
-  const positions = new Float32Array(COUNT * 3);
-  const colors    = new Float32Array(COUNT * 3);
-  const radii     = new Float32Array(COUNT);
-  const angles    = new Float32Array(COUNT);
-  const sizes     = new Float32Array(COUNT);
+  const positions = new Float32Array(count * 3);
+  const colors    = new Float32Array(count * 3);
+  const radii     = new Float32Array(count);
+  const angles    = new Float32Array(count);
+  const sizes     = new Float32Array(count);
+  const tmp       = new THREE.Color();
 
-  const tmp = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    let r, angle, y;
 
-  for (let i = 0; i < COUNT; i++) {
-    // Radius distribution — denser toward the core
-    const t = Math.pow(Math.random(), 1.4);
-    const r = t * RADIUS;
+    if (isBulge) {
+      const t = Math.pow(Math.random(), 1.8);
+      r = radiusMin + t * (radiusMax - radiusMin);
+      angle = Math.random() * Math.PI * 2;
+      y = (Math.random() - 0.5) * (radiusMax * 0.55) * Math.pow(1 - t, 1.2);
+    } else {
+      const t = Math.pow(Math.random(), 1.35);
+      r = radiusMin + t * (radiusMax - radiusMin);
+      const armIndex = i % branches;
+      const armAngle = (armIndex / branches) * Math.PI * 2;
+      const spiralAngle = (r / radiusMax) * spin * Math.PI;
+      const scatter = (1 - t * 0.55) * armWidth;
+      const jitter  = (Math.random() - 0.5) * scatter;
+      const radial  = (Math.random() - 0.5) * radiusMax * 0.04;
+      r = Math.max(0.1, r + radial);
+      angle = armAngle + spiralAngle + jitter;
+      y = (Math.random() - 0.5) * thicknessFactor * radiusMax * (1 - t * 0.7);
+    }
 
-    // Which spiral arm this point belongs to
-    const armIndex = i % BRANCHES;
-    const armAngle = (armIndex / BRANCHES) * Math.PI * 2;
-
-    // Log-spiral twist
-    const spiralAngle = (r / RADIUS) * SPIN * Math.PI;
-
-    // Random scatter — the arms are dense but not razor-thin
-    const jitterAmt    = (0.15 + (1 - t) * 0.35) * 0.55;
-    const angleJitter  = (Math.random() - 0.5) * jitterAmt;
-    const radialJitter = (Math.random() - 0.5) * RADIUS * 0.08;
-
-    radii[i]  = Math.max(0, r + radialJitter);
-    angles[i] = armAngle + spiralAngle + angleJitter;
-
-    // Thin disk, fatter at the core
-    const thickness = (1 - t * 0.75) * RADIUS * 0.075;
+    radii[i]  = r; angles[i] = angle;
     positions[i * 3]     = 0;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * thickness;
+    positions[i * 3 + 1] = y;
     positions[i * 3 + 2] = 0;
 
-    // Size — the core sparkles brighter
-    sizes[i] = (1 - t) * 1.6 + Math.random() * 0.9 + 0.35;
+    const nt = Math.min(1, r / radiusMax);
+    if (nt < 0.35) tmp.copy(colorInner).lerp(colorMid,   nt / 0.35);
+    else           tmp.copy(colorMid).lerp(colorOuter, (nt - 0.35) / 0.65);
 
-    // Warm core → cool arms
-    if (t < 0.35) {
-      tmp.copy(CORE_COLOR).lerp(MID_COLOR, t / 0.35);
-    } else {
-      tmp.copy(MID_COLOR).lerp(OUT_COLOR, (t - 0.35) / 0.65);
-    }
-    colors[i * 3]     = tmp.r;
-    colors[i * 3 + 1] = tmp.g;
-    colors[i * 3 + 2] = tmp.b;
+    const v = 0.85 + Math.random() * 0.3;
+    colors[i * 3]     = tmp.r * v;
+    colors[i * 3 + 1] = tmp.g * v;
+    colors[i * 3 + 2] = tmp.b * v;
+
+    sizes[i] = sizeBase + (1 - nt) * sizeVar * 0.6 + Math.random() * sizeVar * 0.4;
   }
 
   const geo = new THREE.BufferGeometry();
@@ -761,46 +623,30 @@ function createGalaxy() {
       attribute float aRadius;
       attribute float aAngle;
       attribute float aSize;
-
-      uniform float uTime;
-      uniform float uPixelRatio;
-      uniform float uSize;
-
+      uniform float uTime, uPixelRatio, uSize;
       varying vec3 vColor;
-
       void main() {
         vColor = aColor;
-
-        // Differential rotation: inner stars orbit faster than outer ones.
-        // This is what makes the galaxy feel alive rather than a static disc.
-        float speed = 1.15 / (0.9 + aRadius * 0.016);
+        float speed = 1.4 / (1.0 + aRadius * 0.014);
         float angle = aAngle + uTime * speed;
-
         vec3 pos = vec3(cos(angle) * aRadius, position.y, sin(angle) * aRadius);
-
         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-
         gl_PointSize = aSize * uSize * uPixelRatio * (300.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
       }
     `,
     fragmentShader: /* glsl */`
       varying vec3 vColor;
-
       void main() {
         vec2 c = gl_PointCoord - 0.5;
         float d = length(c);
         if (d > 0.5) discard;
-
         float alpha = smoothstep(0.5, 0.0, d);
         alpha = pow(alpha, 1.9);
-
         gl_FragColor = vec4(vColor, alpha);
       }
     `,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
   });
 
   const points = new THREE.Points(geo, mat);
@@ -808,42 +654,72 @@ function createGalaxy() {
   return points;
 }
 
-const galaxy = createGalaxy();
-// Place the galaxy directly behind the ship's final position so the camera
-// looks straight into it at the end of the scroll.
-galaxy.position.set(520, 270, 500);
-// Tilt it slightly so we see it on a 3/4 angle rather than dead-on
-galaxy.rotation.set(-0.55, 0.3, 0.35);
-scene.add(galaxy);
+function createGalaxy() {
+  const group = new THREE.Group();
+  const RADIUS = 220;
 
-/* Bright glowing core sprite on top of the galaxy */
-(function addGalaxyCore() {
+  const CORE_COLOR  = new THREE.Color(0xfff0c0);
+  const WARM_COLOR  = new THREE.Color(0xffb070);
+  const MID_COLOR   = new THREE.Color(0xa8b8ff);
+  const OUTER_COLOR = new THREE.Color(0x5a52c8);
+
+  group.add(buildGalaxyPoints({
+    count: 9000, radiusMin: 0, radiusMax: RADIUS * 0.28,
+    branches: 1, spin: 0,
+    colorInner: CORE_COLOR, colorMid: WARM_COLOR, colorOuter: MID_COLOR,
+    thicknessFactor: 1, armWidth: 1,
+    sizeBase: 1.2, sizeVar: 1.1, isBulge: true
+  }));
+
+  group.add(buildGalaxyPoints({
+    count: 18000, radiusMin: RADIUS * 0.10, radiusMax: RADIUS,
+    branches: 4, spin: 2.3,
+    colorInner: WARM_COLOR, colorMid: MID_COLOR, colorOuter: OUTER_COLOR,
+    thicknessFactor: 0.075, armWidth: 0.55,
+    sizeBase: 0.55, sizeVar: 1.0, isBulge: false
+  }));
+
+  const haze = buildGalaxyPoints({
+    count: 7000, radiusMin: RADIUS * 0.05, radiusMax: RADIUS * 1.05,
+    branches: 4, spin: 2.3,
+    colorInner: MID_COLOR, colorMid: MID_COLOR, colorOuter: OUTER_COLOR,
+    thicknessFactor: 0.16, armWidth: 1.4,
+    sizeBase: 0.35, sizeVar: 0.5, isBulge: false
+  });
+  haze.material.opacity = 0.55;
+  group.add(haze);
+
   const c = document.createElement('canvas');
   c.width = c.height = 256;
   const ctx = c.getContext('2d');
   const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-  g.addColorStop(0.0, 'rgba(255,240,210,1.0)');
-  g.addColorStop(0.15, 'rgba(255,200,140,0.65)');
-  g.addColorStop(0.4, 'rgba(160,140,255,0.25)');
-  g.addColorStop(1.0, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 256, 256);
+  g.addColorStop(0.00, 'rgba(255,245,215,1.0)');
+  g.addColorStop(0.10, 'rgba(255,210,150,0.85)');
+  g.addColorStop(0.28, 'rgba(200,170,255,0.35)');
+  g.addColorStop(0.60, 'rgba(110,140,255,0.10)');
+  g.addColorStop(1.00, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 256);
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-
-  const mat = new THREE.SpriteMaterial({
-    map: tex,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    transparent: true,
-    opacity: 0.85,
-    fog: false
+  const coreMat = new THREE.SpriteMaterial({
+    map: tex, blending: THREE.AdditiveBlending,
+    depthWrite: false, transparent: true, opacity: 0.95, fog: false
   });
-  const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(220, 220, 1);
-  galaxy.add(sprite);
-})();
+  const core = new THREE.Sprite(coreMat);
+  core.scale.set(RADIUS * 1.3, RADIUS * 1.3, 1);
+  group.add(core);
+
+  return group;
+}
+
+const galaxy = createGalaxy();
+const GALAXY_POS = new THREE.Vector3(470, 240, 470);
+galaxy.position.copy(GALAXY_POS);
+galaxy.lookAt(0, 2, 14);
+galaxy.rotateX(Math.PI / 2);
+galaxy.rotateZ(0.42);
+scene.add(galaxy);
 
 /* ============================================================================
  * 6. ASTEROIDS
@@ -852,12 +728,8 @@ function createAsteroids() {
   const group = new THREE.Group();
   const geo   = new THREE.IcosahedronGeometry(1, 0);
   const mat   = new THREE.MeshStandardMaterial({
-    color: 0x5a5048,
-    roughness: 0.9,
-    metalness: 0.15,
-    flatShading: true,
-    emissive: 0x1a1408,
-    emissiveIntensity: 0.35
+    color: 0x5a5048, roughness: 0.9, metalness: 0.15,
+    flatShading: true, emissive: 0x1a1408, emissiveIntensity: 0.35
   });
 
   const list = [];
@@ -893,7 +765,7 @@ const { group: asteroidGroup, list: asteroidList } = createAsteroids();
 scene.add(asteroidGroup);
 
 /* ============================================================================
- * 7. X-WING PLACEHOLDER
+ * 7. X-WING
  * ==========================================================================*/
 function createXWingPlaceholder() {
   const g = new THREE.Group();
@@ -910,10 +782,8 @@ function createXWingPlaceholder() {
     emissive: 0x300008, emissiveIntensity: 0.4
   });
   const canopyMat = new THREE.MeshPhysicalMaterial({
-    color: 0x9ad8ff,
-    metalness: 0, roughness: 0.03,
-    transmission: 0.85,
-    transparent: true, opacity: 0.55,
+    color: 0x9ad8ff, metalness: 0, roughness: 0.03,
+    transmission: 0.85, transparent: true, opacity: 0.55,
     thickness: 0.35, ior: 1.45,
     clearcoat: 1, clearcoatRoughness: 0.03,
     emissive: 0x224466, emissiveIntensity: 0.15,
@@ -977,18 +847,13 @@ function createXWingPlaceholder() {
       hg.addColorStop(0.0, 'rgba(255,200,140,1)');
       hg.addColorStop(0.35, 'rgba(255,130,60,0.55)');
       hg.addColorStop(1.0, 'rgba(255,80,20,0)');
-      hctx.fillStyle = hg;
-      hctx.fillRect(0, 0, 128, 128);
+      hctx.fillStyle = hg; hctx.fillRect(0, 0, 128, 128);
       const haloTex = new THREE.CanvasTexture(haloCanvas);
       haloTex.colorSpace = THREE.SRGBColorSpace;
 
       const haloMat = new THREE.SpriteMaterial({
-        map: haloTex,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        transparent: true,
-        opacity: 1,
-        fog: false
+        map: haloTex, blending: THREE.AdditiveBlending,
+        depthWrite: false, transparent: true, opacity: 1, fog: false
       });
       const halo = new THREE.Sprite(haloMat);
       halo.scale.set(1.4, 1.4, 1);
@@ -1029,17 +894,24 @@ xwing.rotation.set(0, 0, 0);
 scene.add(xwing);
 
 /* ============================================================================
- * 8. SCROLL-DRIVEN CINEMATIC
+ * 8. STATE
  * ==========================================================================*/
-const camState = { x: 0, y: 2, z: 14, shake: 0 };
+const camState = {
+  x: 0, y: 2, z: 14,
+  shake: 0,
+  idleX: 0, idleY: 0, idleZ: 0
+};
+
 const fovState = { value: 50 };
 
 const shipState = {
   x: 0, y: 0, z: -110,
-  rotX: 0, rotY: 0, rotZ: 0
+  rotX: 0, rotY: 0, rotZ: 0,
+  idleX: 0, idleY: 0, idleZ: 0
 };
 
 let shakeTick = 0;
+let scrollProgress = 0;
 
 function applyTransforms() {
   const s = reduceMotion ? 0 : camState.shake;
@@ -1048,12 +920,35 @@ function applyTransforms() {
 
   camera.fov = fovState.value;
   camera.updateProjectionMatrix();
-  camera.position.set(camState.x + shakeX, camState.y + shakeY, camState.z);
-  camera.lookAt(shipState.x, shipState.y + 0.2, shipState.z);
 
-  xwing.position.set(shipState.x, shipState.y, shipState.z);
+  camera.position.set(
+    camState.x + camState.idleX + shakeX,
+    camState.y + camState.idleY + shakeY,
+    camState.z + camState.idleZ
+  );
+
+  xwing.position.set(
+    shipState.x + shipState.idleX,
+    shipState.y + shipState.idleY,
+    shipState.z + shipState.idleZ
+  );
   xwing.rotation.set(shipState.rotX, shipState.rotY, shipState.rotZ);
+
+  camera.lookAt(xwing.position);
 }
+
+/* ============================================================================
+ * 9. TIMELINE — velocity-continuous eases
+ * ---------------------------------------------------------------------------
+ *  Phase boundaries alternate between power2.in (accelerating) and
+ *  power2.out (decelerating), so the velocity at the end of each phase
+ *  exactly matches the velocity at the start of the next. The result is a
+ *  smooth, cinematic speed arc:
+ *
+ *      0 → fast → hold → fast → hold → fast
+ *    (arrive)  (hang) (whip) (edge) (launch)
+ * ==========================================================================*/
+let scrollTimeline = null;
 
 function buildScrollTimeline() {
   const tl = gsap.timeline({
@@ -1062,21 +957,16 @@ function buildScrollTimeline() {
       trigger: document.documentElement,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.15,
+      scrub: 1.5,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        progressBar.style.width = (self.progress * 100) + '%';
-        shakeTick += 1;
-
-        const p = self.progress;
-        let flash = Math.max(0, 1 - Math.abs(p - 0.58) / 0.06);
-        flash = flash * flash * (3 - 2 * flash);
-        flashEl.style.opacity = (reduceMotion ? flash * 0.2 : flash * 0.55).toFixed(3);
+        // Only drives UI when ScrollTrigger is live (i.e. not during autoplay)
+        onProgress(self.progress);
       }
     }
   });
 
-  /* --- APPROACH (0.00 → 0.28) --- */
+  /* --- APPROACH (0.00 → 0.28) — accel from rest --- */
   tl.to(shipState, {
     x: 0, y: 0.4, z: -12,
     rotX: 0, rotY: 0.02, rotZ: 0.03,
@@ -1084,72 +974,140 @@ function buildScrollTimeline() {
   }, 0);
   tl.to(camState, {
     x: 0.4, y: 2.5, z: 12.5,
-    duration: 0.28, ease: 'power1.inOut'
+    duration: 0.28, ease: 'sine.inOut'
   }, 0);
 
-  /* --- THE MOMENT (0.28 → 0.52) --- */
+  /* --- THE MOMENT (0.28 → 0.50) — decel to hang --- */
   tl.to(shipState, {
     x: 0.4, y: 0.6, z: 4,
     rotX: 0, rotY: 0.06, rotZ: -0.06,
-    duration: 0.24, ease: 'power2.inOut'
+    duration: 0.22, ease: 'power2.out'
   }, 0.28);
   tl.to(camState, {
     x: 0.6, y: 2.7, z: 12.2,
-    duration: 0.24, ease: 'power2.inOut'
+    duration: 0.22, ease: 'sine.inOut'
   }, 0.28);
 
-  /* --- WHIP PAST (0.52 → 0.82) --- */
+  /* --- WHIP PAST (0.50 → 0.78) — accel, then decel at the edge --- */
+  // Part 1: ship banks and accelerates
   tl.to(shipState, {
     x: 3.5, y: 1.4, z: 12,
     rotX: -0.10, rotY: 0.28, rotZ: -0.30,
-    duration: 0.15, ease: 'power1.inOut'
-  }, 0.52);
+    duration: 0.14, ease: 'power2.in'
+  }, 0.50);
+  // Part 2: ship crosses and decelerates at the frame edge
   tl.to(shipState, {
     x: 14, y: 3.8, z: 30,
     rotX: -0.35, rotY: 0.85, rotZ: -0.85,
-    duration: 0.15, ease: 'power1.out'
-  }, 0.67);
+    duration: 0.14, ease: 'power2.out'
+  }, 0.64);
   tl.to(camState, {
     x: 1.0, y: 3.0, z: 11.5,
-    duration: 0.30, ease: 'power1.inOut'
-  }, 0.52);
+    duration: 0.28, ease: 'sine.inOut'
+  }, 0.50);
 
-  tl.to(camState, { shake: 1, duration: 0.08, ease: 'power2.out' }, 0.58);
-  tl.to(camState, { shake: 0, duration: 0.16, ease: 'power2.in'  }, 0.70);
+  // Camera shake peaks right as the ship crosses
+  tl.to(camState, { shake: 1, duration: 0.08, ease: 'sine.out' }, 0.55);
+  tl.to(camState, { shake: 0, duration: 0.16, ease: 'sine.in'  }, 0.68);
 
-  tl.to(fovState, { value: 64, duration: 0.08, ease: 'power2.in'  }, 0.55);
-  tl.to(fovState, { value: 50, duration: 0.20, ease: 'power2.out' }, 0.63);
+  // Lens FOV punch
+  tl.to(fovState, { value: 64, duration: 0.08, ease: 'sine.in'  }, 0.52);
+  tl.to(fovState, { value: 50, duration: 0.20, ease: 'sine.out' }, 0.60);
 
-  /* --- BLAST AWAY (0.82 → 1.00) --- */
+  /* --- INTO THE GALAXY (0.78 → 1.00) — accel into the distance --- */
   tl.to(shipState, {
-    x: 90, y: 55, z: 95,
-    rotX: -0.75, rotY: 1.55, rotZ: -0.25,
-    duration: 0.18, ease: 'power3.out'
-  }, 0.82);
+    x: 220, y: 130, z: 260,
+    rotX: -1.05, rotY: 1.75, rotZ: -0.15,
+    duration: 0.22, ease: 'power2.in'
+  }, 0.78);
+
   tl.to(camState, {
     x: 1.4, y: 3.3, z: 9.5,
-    duration: 0.18, ease: 'power2.out'
-  }, 0.82);
+    duration: 0.22, ease: 'sine.inOut'
+  }, 0.78);
 
-  // A last, gentle push of the camera FOV as the ship reaches the galaxy
-  tl.to(fovState, { value: 46, duration: 0.18, ease: 'power1.inOut' }, 0.82);
+  tl.to(fovState, { value: 42, duration: 0.22, ease: 'sine.inOut' }, 0.78);
 
   return tl;
 }
 
-buildScrollTimeline();
+/* Shared UI update — called from ScrollTrigger (manual scroll)
+ * and from autoplay (direct progress tween). */
+function onProgress(p) {
+  scrollProgress = p;
+  progressBar.style.width = (p * 100) + '%';
+  shakeTick += 1;
+
+  let flash = Math.max(0, 1 - Math.abs(p - 0.55) / 0.06);
+  flash = flash * flash * (3 - 2 * flash);
+  flashEl.style.opacity = (reduceMotion ? flash * 0.2 : flash * 0.55).toFixed(3);
+}
+
+scrollTimeline = buildScrollTimeline();
 applyTransforms();
 
 /* ============================================================================
- * 9. TYPOGRAPHY ANIMATIONS
- * ---------------------------------------------------------------------------
- *  • Hero title: mask-reveal on load
- *  • Section kickers: line draws in, text slides from the side
- *  • Section headings: word-by-word mask reveal on scroll
- *  • Paragraphs: soft rise + fade on scroll
+ * 10. IDLE DRIFT
  * ==========================================================================*/
+const shipFinalPos   = new THREE.Vector3(220, 130, 260);
+const driftDirection = GALAXY_POS.clone().sub(shipFinalPos).normalize();
+const driftMaxDist   = GALAXY_POS.distanceTo(shipFinalPos) * 0.82;
 
-/* --- Splits an element's text into per-word mask spans --- */
+let idleDist = 0;
+
+function updateIdleDrift(dt) {
+  if (reduceMotion) return;
+
+  const atEnd = scrollProgress > 0.985;
+
+  if (atEnd) {
+    const remaining  = driftMaxDist - idleDist;
+    const easeFactor = Math.max(0.15, remaining / driftMaxDist);
+    const speed      = 55 * easeFactor;
+    idleDist = Math.min(driftMaxDist, idleDist + speed * dt);
+  }
+
+  const dx = driftDirection.x * idleDist;
+  const dy = driftDirection.y * idleDist;
+  const dz = driftDirection.z * idleDist;
+
+  shipState.idleX = dx;
+  shipState.idleY = dy;
+  shipState.idleZ = dz;
+
+  camState.idleX = dx * 0.22;
+  camState.idleY = dy * 0.22;
+  camState.idleZ = dz * 0.22;
+}
+
+/* ============================================================================
+ * 11. TYPOGRAPHY
+ * ==========================================================================*/
+function splitIntoChars(el) {
+  const chars = [];
+  Array.from(el.childNodes).forEach((node) => {
+    if (node.nodeType !== Node.TEXT_NODE) return;
+    const text = node.nodeValue;
+    const frag = document.createDocumentFragment();
+    for (const ch of text) {
+      if (ch === ' ') {
+        frag.appendChild(document.createTextNode(' '));
+      } else {
+        const mask  = document.createElement('span');
+        mask.className = 'wm';
+        const inner = document.createElement('span');
+        inner.className = 'wi';
+        inner.textContent = ch;
+        mask.appendChild(inner);
+        frag.appendChild(mask);
+        chars.push(inner);
+      }
+    }
+    el.replaceChild(frag, node);
+  });
+  return chars;
+}
+
 function splitIntoWords(el) {
   const words = [];
   const walk = (node, parent) => {
@@ -1162,7 +1120,7 @@ function splitIntoWords(el) {
         if (/^\s+$/.test(part)) {
           frag.appendChild(document.createTextNode(part));
         } else {
-          const mask = document.createElement('span');
+          const mask  = document.createElement('span');
           mask.className = 'wm';
           const inner = document.createElement('span');
           inner.className = 'wi';
@@ -1182,51 +1140,46 @@ function splitIntoWords(el) {
   return words;
 }
 
-/* --- Hero title: mask reveal on load --- */
-if (!reduceMotion) {
-  gsap.from('.hero-title span', {
-    yPercent: 130,
-    duration: 1.5,
-    ease: 'power4.out',
-    delay: 0.35
-  });
-  gsap.from('.hero-title', {
-    '--glow': 0,
-    duration: 1.8,
-    delay: 0.5,
-    ease: 'power2.out'
-  });
+const heroTitle = document.querySelector('.hero-title[data-split-chars]');
+if (heroTitle) {
+  const chars = splitIntoChars(heroTitle);
+  if (!reduceMotion) {
+    gsap.from(chars, {
+      yPercent: 130, rotateX: -55,
+      duration: 1.4, ease: 'power4.out',
+      stagger: 0.05, delay: 0.4
+    });
+  }
 }
 
-/* --- Kickers, headings, paragraphs: on scroll --- */
 document.querySelectorAll('section').forEach((section) => {
-  const kicker  = section.querySelector('.kicker');
+  const kicker     = section.querySelector('.kicker');
   const kickerLine = section.querySelector('.kicker .line');
-  const heading = section.querySelector('h2[data-split]');
-  const para    = section.querySelector('p');
-  const cta     = section.querySelector('.cta');
+  const heading    = section.querySelector('h2[data-split]');
+  const para       = section.querySelector('p');
+  const cta        = section.querySelector('.cta');
+  const isRight    = section.classList.contains('right');
 
-  if (kicker && kickerLine && !reduceMotion) {
+  const trigger = {
+    trigger: section,
+    start: 'top 78%',
+    toggleActions: 'play none none reverse'
+  };
+
+  if (kickerLine && !reduceMotion) {
     gsap.from(kickerLine, {
-      scaleX: 0,
-      duration: 0.9,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: section,
-        start: 'top 78%',
-        toggleActions: 'play none none reverse'
-      }
+      scaleX: 0, duration: 1.0, ease: 'power3.out', scrollTrigger: trigger
     });
+  }
+
+  if (kicker && !reduceMotion) {
     gsap.from(kicker, {
-      opacity: 0,
-      x: section.classList.contains('right') ? 20 : -20,
-      duration: 0.8,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: section,
-        start: 'top 78%',
-        toggleActions: 'play none none reverse'
-      }
+      opacity: 0, x: isRight ? 20 : -20,
+      duration: 0.9, ease: 'power2.out', scrollTrigger: trigger
+    });
+    gsap.to(kicker, {
+      y: -4, duration: 3.2, ease: 'sine.inOut',
+      repeat: -1, yoyo: true
     });
   }
 
@@ -1234,13 +1187,9 @@ document.querySelectorAll('section').forEach((section) => {
     const words = splitIntoWords(heading);
     if (!reduceMotion) {
       gsap.from(words, {
-        yPercent: 120,
-        duration: 1.1,
-        ease: 'power4.out',
-        stagger: 0.06,
+        yPercent: 120, duration: 1.15, ease: 'power4.out', stagger: 0.05,
         scrollTrigger: {
-          trigger: section,
-          start: 'top 72%',
+          trigger: section, start: 'top 72%',
           toggleActions: 'play none none reverse'
         }
       });
@@ -1249,15 +1198,10 @@ document.querySelectorAll('section').forEach((section) => {
 
   if (para && !reduceMotion) {
     gsap.from(para, {
-      opacity: 0,
-      y: 30,
-      filter: 'blur(6px)',
-      duration: 1.1,
-      ease: 'power3.out',
-      delay: 0.15,
+      opacity: 0, y: 26, filter: 'blur(6px)',
+      duration: 1.1, ease: 'power3.out', delay: 0.15,
       scrollTrigger: {
-        trigger: section,
-        start: 'top 72%',
+        trigger: section, start: 'top 72%',
         toggleActions: 'play none none reverse'
       }
     });
@@ -1265,14 +1209,10 @@ document.querySelectorAll('section').forEach((section) => {
 
   if (cta && !reduceMotion) {
     gsap.from(cta, {
-      opacity: 0,
-      y: 20,
-      duration: 1,
-      delay: 0.35,
-      ease: 'power3.out',
+      opacity: 0, y: 20,
+      duration: 1.0, delay: 0.35, ease: 'power3.out',
       scrollTrigger: {
-        trigger: section,
-        start: 'top 72%',
+        trigger: section, start: 'top 72%',
         toggleActions: 'play none none reverse'
       }
     });
@@ -1280,35 +1220,67 @@ document.querySelectorAll('section').forEach((section) => {
 });
 
 /* ============================================================================
- * 10. AUTOPLAY
+ * 12. AUTOPLAY  (silky version)
+ * ---------------------------------------------------------------------------
+ *  During autoplay, ScrollTrigger is DISABLED and we tween the timeline's
+ *  own `.progress` property directly. This bypasses the scrub smoothing
+ *  layer entirely — the flight plays at a perfectly even rate with zero
+ *  rubber-banding, zero micro-pauses, zero frame-sync jitter.
+ *
+ *  On finish (or on user takeover), ScrollTrigger is re-enabled and the
+ *  page's scroll position is snapped to match the current timeline progress.
+ *  No visual jump, no snap, no hitch.
  * ==========================================================================*/
-const AUTOPLAY_SECONDS = 24;
+const AUTOPLAY_SECONDS = 22;
 
-let autoTween  = null;
-let autoActive = false;
+let autoTween   = null;
+let autoActive  = false;
+let st          = null;    // ScrollTrigger instance, filled in lazily
+
+function getScrollTrigger() {
+  if (!st && scrollTimeline) st = scrollTimeline.scrollTrigger;
+  return st;
+}
 
 function startAutoplay() {
-  if (reduceMotion) return;
+  if (reduceMotion || !scrollTimeline) return;
 
+  // Reset everything
+  idleDist = 0;
+  scrollTimeline.progress(0);
   window.scrollTo(0, 0);
 
-  const proxy = { t: 0 };
+  // Disable ScrollTrigger so it can't fight us for control of `progress`
+  const trigger = getScrollTrigger();
+  if (trigger) trigger.disable(false);
 
   autoActive = true;
   autoplayBadge.classList.remove('ui-hidden');
   replayBtn.classList.add('ui-hidden');
 
-  autoTween = gsap.to(proxy, {
-    t: 1,
+  // Prime the UI at 0
+  onProgress(0);
+
+  autoTween = gsap.to(scrollTimeline, {
+    progress: 1,
     duration: AUTOPLAY_SECONDS,
-    ease: 'none',
+    ease: 'none',       // perfectly linear — the eases live inside the timeline
+    overwrite: true,    // kill any lingering tween on the same target
     onUpdate: () => {
+      const p = scrollTimeline.progress();
+      onProgress(p);
+
+      // Keep the scrollbar visually in sync with the flight
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      window.scrollTo(0, proxy.t * max);
+      window.scrollTo(0, p * max);
     },
     onComplete: () => {
       autoActive = false;
       autoTween  = null;
+
+      // Hand control back to ScrollTrigger at the exact current position
+      if (trigger) trigger.enable();
+
       autoplayBadge.classList.add('ui-hidden');
       replayBtn.classList.remove('ui-hidden');
     }
@@ -1316,10 +1288,22 @@ function startAutoplay() {
 }
 
 function cancelAutoplay() {
-  if (!autoActive) return;
+  if (!autoActive || !scrollTimeline) return;
+
   autoActive = false;
-  if (autoTween) autoTween.kill();
-  autoTween = null;
+
+  const p = scrollTimeline.progress();
+  if (autoTween) { autoTween.kill(); autoTween = null; }
+
+  const trigger = getScrollTrigger();
+  if (trigger) {
+    // Snap the page to the timeline's current progress BEFORE re-enabling,
+    // so ScrollTrigger picks up exactly where the autoplay left off.
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo(0, p * max);
+    trigger.enable();
+  }
+
   autoplayBadge.classList.add('ui-hidden');
   replayBtn.classList.remove('ui-hidden');
 }
@@ -1332,7 +1316,7 @@ function cancelAutoplay() {
 });
 
 window.addEventListener('load', () => {
-  setTimeout(startAutoplay, 550);
+  setTimeout(startAutoplay, 500);
 });
 
 replayBtn.addEventListener('click', (e) => {
@@ -1341,7 +1325,7 @@ replayBtn.addEventListener('click', (e) => {
 });
 
 /* ============================================================================
- * 11. RESIZE HANDLER
+ * 13. RESIZE
  * ==========================================================================*/
 function onResize() {
   const w = window.innerWidth;
@@ -1362,23 +1346,22 @@ function onResize() {
 window.addEventListener('resize', onResize);
 
 /* ============================================================================
- * 12. RENDER LOOP
+ * 14. RENDER LOOP
  * ==========================================================================*/
 const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
 
-  const dt = clock.getDelta();
+  const dt = Math.min(clock.getDelta(), 0.05);
   const t  = clock.getElapsedTime();
 
-  // Twinkle stars + rotate galaxy
   starUniforms.uTime.value   = t;
-  galaxyUniforms.uTime.value = t;
+  galaxyUniforms.uTime.value = t * 0.55;
 
+  updateIdleDrift(dt);
   applyTransforms();
 
-  // Asteroid spin
   for (const rock of asteroidList) {
     const s = rock.userData.spin;
     rock.rotation.x += s.x * dt;
@@ -1386,7 +1369,6 @@ function animate() {
     rock.rotation.z += s.z * dt;
   }
 
-  // Engine pulse
   const glows  = xwing.userData.engineGlows  || [];
   const lights = xwing.userData.engineLights || [];
   const halos  = xwing.userData.engineHalos  || [];
