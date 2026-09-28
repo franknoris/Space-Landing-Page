@@ -353,19 +353,21 @@
 
 <script type="module">
 /* ============================================================================
- * X-WING — CINEMATIC SCROLL EXPERIENCE  (v9 — placeholder ship, faster, smooth reverse)
+ * X-WING — CINEMATIC SCROLL EXPERIENCE  (v10 — no pauses, faster, smoother)
  * ---------------------------------------------------------------------------
- *  Fixes in this version:
- *    • Reverse-scroll now works cleanly. Idle drift unwinds smoothly when
- *      you scroll back up — no more ship stuck at the far galaxy.
- *    • Autoplay is faster (13s) and the whole choreography is tighter.
- *    • "Hang in frame" moment is shorter — less waiting, more flying.
- *    • Placeholder primitives restored (swap in your .glb by uncommenting
- *      the marked GLTFLoader block).
+ *  What changed from v9:
+ *    • Every phase tween is now LINEAR (ease: 'none'). No ease-in/out means
+ *      no velocity dips — the ship is always in motion. Phase boundaries are
+ *      gear-shifts, not stalls.
+ *    • The old "hang in frame" moment is GONE. It was the biggest source of
+ *      the feeling of pausing.
+ *    • Autoplay: 13s → 10s.
+ *    • Camera roll during the whip for a cinematic bank.
+ *    • Stronger ship bank, sharper FOV punch, tighter shake.
+ *    • Reverse-scroll unwind made snappier.
  * ==========================================================================*/
 
 import * as THREE from 'three';
-// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 gsap.registerPlugin(ScrollTrigger);
 gsap.ticker.lagSmoothing(500, 33);
@@ -761,10 +763,6 @@ scene.add(asteroidGroup);
 
 /* ============================================================================
  * 7. X-WING — PLACEHOLDER PRIMITIVES
- * ---------------------------------------------------------------------------
- *  To swap in your GLB:
- *    1. Uncomment the GLTFLoader import at the top.
- *    2. Replace this entire section with the loader code (see v8 comments).
  * ==========================================================================*/
 function createXWingPlaceholder() {
   const g = new THREE.Group();
@@ -902,7 +900,8 @@ const camState = {
   idleX: 0, idleY: 0, idleZ: 0
 };
 
-const fovState = { value: 50 };
+const fovState  = { value: 50 };
+const camRoll   = { value: 0 };   // extra roll applied after lookAt — cinematic bank
 
 const shipState = {
   x: 0, y: 0, z: -110,
@@ -935,19 +934,20 @@ function applyTransforms() {
   xwing.rotation.set(shipState.rotX, shipState.rotY, shipState.rotZ);
 
   camera.lookAt(xwing.position);
+  // Roll around the local view axis for a cinematic camera bank during the whip
+  camera.rotateZ(camRoll.value);
 }
 
 /* ============================================================================
- * 9. TIMELINE — retimed for punchier pacing
+ * 9. TIMELINE — LINEAR EVERYWHERE (no pauses)
  * ---------------------------------------------------------------------------
- *  Phase breakdown (was → now):
- *    approach   0.28 → 0.30   (slightly longer, feels like a rocket)
- *    moment     0.22 → 0.15   (SHORTER hang — less waiting around)
- *    whip P1    0.14 → 0.13
- *    whip P2    0.14 → 0.13
- *    into gal   0.22 → 0.29   (longer, sweeping exit)
- *                ───    ───
- *               1.00   1.00  ✓
+ *  Every phase uses ease: 'none'. Velocity is constant within each phase and
+ *  only "gear-shifts" between them. The ship is never stationary.
+ *
+ *  Velocity graph (distance / duration ≈ speed):
+ *    P1  122 u / 0.35 = 349 u/prog
+ *    P2   97 u / 0.25 = 388 u/prog   ← slight kick
+ *    P3  268 u / 0.40 = 670 u/prog   ← afterburner
  * ==========================================================================*/
 let scrollTimeline = null;
 
@@ -958,69 +958,64 @@ function buildScrollTimeline() {
       trigger: document.documentElement,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.5,
+      scrub: 1.2,
       invalidateOnRefresh: true,
       onUpdate: (self) => onProgress(self.progress)
     }
   });
 
-  /* --- APPROACH (0.00 → 0.30) --- */
+  /* --- PHASE 1 · APPROACH (0.00 → 0.35) — LINEAR ---
+   *  Ship cruises in from deep space. Ends close to the lens, filling frame.
+   */
   tl.to(shipState, {
-    x: 0, y: 0.4, z: -12,
-    rotX: 0, rotY: 0.02, rotZ: 0.03,
-    duration: 0.30, ease: 'power2.in'
+    x: 0, y: 0.5, z: 12,
+    rotX: 0, rotY: 0.03, rotZ: 0.04,
+    duration: 0.35, ease: 'none'
   }, 0);
   tl.to(camState, {
-    x: 0.4, y: 2.5, z: 12.5,
-    duration: 0.30, ease: 'sine.inOut'
+    x: 0.3, y: 2.4, z: 12.5,
+    duration: 0.35, ease: 'none'
   }, 0);
 
-  /* --- THE MOMENT (0.30 → 0.45) — short, dramatic hang --- */
+  /* --- PHASE 2 · WHIP PAST (0.35 → 0.60) — LINEAR ---
+   *  One continuous sweep: ship shoots past the lens, banking hard, camera
+   *  banks with it. No pause at any point.
+   */
   tl.to(shipState, {
-    x: 0.4, y: 0.6, z: 4,
-    rotX: 0, rotY: 0.06, rotZ: -0.06,
-    duration: 0.15, ease: 'power2.out'
-  }, 0.30);
-  tl.to(camState, {
-    x: 0.6, y: 2.7, z: 12.2,
-    duration: 0.15, ease: 'sine.inOut'
-  }, 0.30);
-
-  /* --- WHIP PAST (0.45 → 0.71) --- */
-  tl.to(shipState, {
-    x: 3.5, y: 1.4, z: 12,
-    rotX: -0.10, rotY: 0.28, rotZ: -0.30,
-    duration: 0.13, ease: 'power2.in'
-  }, 0.45);
-  tl.to(shipState, {
-    x: 14, y: 3.8, z: 30,
-    rotX: -0.35, rotY: 0.85, rotZ: -0.85,
-    duration: 0.13, ease: 'power2.out'
-  }, 0.58);
+    x: 35, y: 20, z: 100,
+    rotX: -0.55, rotY: 0.90, rotZ: -1.15,
+    duration: 0.25, ease: 'none'
+  }, 0.35);
   tl.to(camState, {
     x: 1.0, y: 3.0, z: 11.5,
-    duration: 0.26, ease: 'sine.inOut'
-  }, 0.45);
+    duration: 0.25, ease: 'none'
+  }, 0.35);
 
-  tl.to(camState, { shake: 1, duration: 0.08, ease: 'sine.out' }, 0.50);
-  tl.to(camState, { shake: 0, duration: 0.14, ease: 'sine.in'  }, 0.62);
+  // Cinematic camera roll — peaks mid-whip, settles fast
+  tl.to(camRoll, { value: 0.24, duration: 0.25, ease: 'none' }, 0.35);
+  tl.to(camRoll, { value: 0,    duration: 0.12, ease: 'power2.out' }, 0.60);
 
-  tl.to(fovState, { value: 64, duration: 0.07, ease: 'sine.in'  }, 0.47);
-  tl.to(fovState, { value: 50, duration: 0.18, ease: 'sine.out' }, 0.54);
+  // Camera shake peaks as the ship crosses
+  tl.to(camState, { shake: 1, duration: 0.06, ease: 'power2.out' }, 0.44);
+  tl.to(camState, { shake: 0, duration: 0.16, ease: 'power2.in'  }, 0.56);
 
-  /* --- INTO THE GALAXY (0.71 → 1.00) --- */
+  // Lens punch — quick, snappy
+  tl.to(fovState, { value: 68, duration: 0.06, ease: 'power2.in'  }, 0.42);
+  tl.to(fovState, { value: 50, duration: 0.18, ease: 'power2.out' }, 0.50);
+
+  /* --- PHASE 3 · INTO THE VOID (0.60 → 1.00) — LINEAR ---
+   *  Ship accelerates away, up and out, toward the galaxy.
+   *  Ends tiny against the galactic spiral.
+   */
   tl.to(shipState, {
     x: 220, y: 130, z: 260,
-    rotX: -1.05, rotY: 1.75, rotZ: -0.15,
-    duration: 0.29, ease: 'power2.in'
-  }, 0.71);
-
+    rotX: 0.40, rotY: 1.55, rotZ: -0.35,
+    duration: 0.40, ease: 'none'
+  }, 0.60);
   tl.to(camState, {
     x: 1.4, y: 3.3, z: 9.5,
-    duration: 0.29, ease: 'sine.inOut'
-  }, 0.71);
-
-  tl.to(fovState, { value: 42, duration: 0.29, ease: 'sine.inOut' }, 0.71);
+    duration: 0.40, ease: 'none'
+  }, 0.60);
 
   return tl;
 }
@@ -1030,21 +1025,17 @@ function onProgress(p) {
   progressBar.style.width = (p * 100) + '%';
   shakeTick += 1;
 
-  let flash = Math.max(0, 1 - Math.abs(p - 0.52) / 0.06);
+  // Cinematic flash just after the ship crosses the lens
+  let flash = Math.max(0, 1 - Math.abs(p - 0.50) / 0.05);
   flash = flash * flash * (3 - 2 * flash);
-  flashEl.style.opacity = (reduceMotion ? flash * 0.2 : flash * 0.55).toFixed(3);
+  flashEl.style.opacity = (reduceMotion ? flash * 0.2 : flash * 0.5).toFixed(3);
 }
 
 scrollTimeline = buildScrollTimeline();
 applyTransforms();
 
 /* ============================================================================
- * 10. IDLE DRIFT — WITH SMOOTH UNWIND ON SCROLL BACK
- * ---------------------------------------------------------------------------
- *  When at the bottom of the page, the ship keeps flying toward the galaxy.
- *  When the user scrolls back up (progress drops below the threshold), the
- *  drift UNWINDS smoothly back to zero, so the ship returns to its exact
- *  scroll-driven position and the reverse animation plays cleanly.
+ * 10. IDLE DRIFT — smooth unwind on reverse
  * ==========================================================================*/
 const shipFinalPos   = new THREE.Vector3(220, 130, 260);
 const driftDirection = GALAXY_POS.clone().sub(shipFinalPos).normalize();
@@ -1058,15 +1049,13 @@ function updateIdleDrift(dt) {
   const atEnd = scrollProgress > 0.985;
 
   if (atEnd) {
-    // Ease toward max drift — slows as we get close to the galaxy
     const remaining  = driftMaxDist - idleDist;
     const easeFactor = Math.max(0.15, remaining / driftMaxDist);
-    const speed      = 55 * easeFactor;
+    const speed      = 60 * easeFactor;
     idleDist = Math.min(driftMaxDist, idleDist + speed * dt);
   } else if (idleDist > 0) {
-    // Smoothly unwind back to zero when scrolling away from the end.
-    // Exponential decay: ~90% of the way back in half a second.
-    idleDist *= Math.pow(0.01, dt);
+    // Snappy exponential unwind — reverse scroll feels instant
+    idleDist *= Math.pow(0.008, dt);
     if (idleDist < 0.05) idleDist = 0;
   }
 
@@ -1223,9 +1212,9 @@ document.querySelectorAll('section').forEach((section) => {
 });
 
 /* ============================================================================
- * 12. AUTOPLAY — faster
+ * 12. AUTOPLAY — 10s
  * ==========================================================================*/
-const AUTOPLAY_SECONDS = 13;   // was 22 → much snappier
+const AUTOPLAY_SECONDS = 10;   // was 22 → 13 → 10
 
 let autoTween   = null;
 let autoActive  = false;
@@ -1239,10 +1228,11 @@ function getScrollTrigger() {
 function startAutoplay() {
   if (reduceMotion || !scrollTimeline) return;
 
-  // Reset drift AND timeline so the flight always starts cleanly
+  // Full reset — no drift, no leftover roll
   idleDist = 0;
   shipState.idleX = shipState.idleY = shipState.idleZ = 0;
   camState.idleX  = camState.idleY  = camState.idleZ  = 0;
+  camRoll.value   = 0;
 
   scrollTimeline.progress(0);
   window.scrollTo(0, 0);
