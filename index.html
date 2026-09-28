@@ -353,59 +353,22 @@
 
 <script type="module">
 /* ============================================================================
- * X-WING — CINEMATIC SCROLL EXPERIENCE  (v8 — real GLB model)
+ * X-WING — CINEMATIC SCROLL EXPERIENCE  (v9 — placeholder ship, faster, smooth reverse)
  * ---------------------------------------------------------------------------
- *  The placeholder primitives have been REPLACED with your real model:
- *      ./assets/x-_wing_fighter__t-70_from_star_wars_ep.7.glb
- *
- *  Everything else — the flight choreography, timings, eases, autoplay,
- *  galaxy, twinkling stars, typography, idle drift — is unchanged.
- *
- *  If the ship looks off, adjust the MODEL_CONFIG below:
- *      • rotationY — spin the ship so its nose faces the camera
- *      • scale    — auto-fit is applied, but you can multiply it
- *      • offset   — nudge position if the model isn't centered
- *
- *  Engine glow (the four pulsing lights) is auto-positioned at the rear
- *  of the model's bounding box. Set ENGINE_GLOW_ENABLED = false if you'd
- *  rather rely purely on the model's own materials.
+ *  Fixes in this version:
+ *    • Reverse-scroll now works cleanly. Idle drift unwinds smoothly when
+ *      you scroll back up — no more ship stuck at the far galaxy.
+ *    • Autoplay is faster (13s) and the whole choreography is tighter.
+ *    • "Hang in frame" moment is shorter — less waiting, more flying.
+ *    • Placeholder primitives restored (swap in your .glb by uncommenting
+ *      the marked GLTFLoader block).
  * ==========================================================================*/
 
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 gsap.registerPlugin(ScrollTrigger);
 gsap.ticker.lagSmoothing(500, 33);
-
-/* ============================================================================
- * 0. MODEL CONFIG  ← tweak these if the ship looks wrong
- * ==========================================================================*/
-const MODEL_CONFIG = {
-  path: './assets/model.glb',
-
-  // Rotate around Y so the ship's NOSE faces the camera at rest.
-  // Many exports face -Z (tail to us) → Math.PI corrects that.
-  // If the ship is sideways, try ±Math.PI/2.
-  rotationY: Math.PI,
-
-  // Additional rotation tweaks (usually 0)
-  rotationX: 0,
-  rotationZ: 0,
-
-  // The auto-fit targets this size for the longest dimension of the model.
-  // 5 units matches the placeholder's wingspan, so the flight choreography
-  // stays framed exactly the same.
-  targetSize: 5.0,
-
-  // Extra scale multiplier on top of auto-fit (usually 1)
-  scaleMultiplier: 1.0,
-
-  // Position offset applied AFTER centering (in ship-local units)
-  offset: { x: 0, y: 0, z: 0 }
-};
-
-// Set to false to skip the artificial engine glow (if the model has its own)
-const ENGINE_GLOW_ENABLED = true;
 
 /* ============================================================================
  * 1. SETUP
@@ -459,11 +422,6 @@ scene.add(rim);
 const fill = new THREE.DirectionalLight(0x7799dd, 0.75);
 fill.position.set(0, -20, 30);
 scene.add(fill);
-
-// Extra key light from camera-front, softer, so the ship reads well head-on
-const key = new THREE.DirectionalLight(0xffffff, 0.9);
-key.position.set(0, 8, 30);
-scene.add(key);
 
 /* ============================================================================
  * 3. NEBULA GLOW
@@ -802,190 +760,138 @@ const { group: asteroidGroup, list: asteroidList } = createAsteroids();
 scene.add(asteroidGroup);
 
 /* ============================================================================
- * 7. X-WING — REAL GLB MODEL
+ * 7. X-WING — PLACEHOLDER PRIMITIVES
  * ---------------------------------------------------------------------------
- *  The outer `xwing` group is what the GSAP timeline animates. We load the
- *  GLB, auto-fit it (scale + center), and add it as a child. Everything
- *  downstream (position/rotation tweens) targets the group, so nothing else
- *  in the flight code needs to change.
+ *  To swap in your GLB:
+ *    1. Uncomment the GLTFLoader import at the top.
+ *    2. Replace this entire section with the loader code (see v8 comments).
  * ==========================================================================*/
-const xwing = new THREE.Group();
-xwing.name = 'xwing';
-xwing.position.set(0, 0, -110);
-xwing.rotation.set(0, 0, 0);
+function createXWingPlaceholder() {
+  const g = new THREE.Group();
+  g.name = 'xwing';
 
-// Set to true once the model finishes loading
-let modelLoaded = false;
+  const hullMat = new THREE.MeshStandardMaterial({
+    color: 0xe6ecf4, metalness: 0.85, roughness: 0.28
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x262a32, metalness: 0.9, roughness: 0.35
+  });
+  const trimMat = new THREE.MeshStandardMaterial({
+    color: 0xb02030, metalness: 0.55, roughness: 0.4,
+    emissive: 0x300008, emissiveIntensity: 0.4
+  });
+  const canopyMat = new THREE.MeshPhysicalMaterial({
+    color: 0x9ad8ff, metalness: 0, roughness: 0.03,
+    transmission: 0.85, transparent: true, opacity: 0.55,
+    thickness: 0.35, ior: 1.45,
+    clearcoat: 1, clearcoatRoughness: 0.03,
+    emissive: 0x224466, emissiveIntensity: 0.15,
+    side: THREE.DoubleSide
+  });
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0xffb070, fog: false, toneMapped: false, transparent: true, opacity: 1
+  });
 
-// Engine glow containers — populated after the model loads
-const engineGlows  = [];
-const engineLights = [];
-const engineHalos  = [];
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, 5.0, 14), hullMat);
+  body.rotation.x = Math.PI / 2;
+  body.position.z = 1.4;
+  g.add(body);
 
-xwing.userData.engineGlows  = engineGlows;
-xwing.userData.engineLights = engineLights;
-xwing.userData.engineHalos  = engineHalos;
+  const rear = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, 1.7, 14), darkMat);
+  rear.rotation.x = Math.PI / 2;
+  rear.position.z = -1.85;
+  g.add(rear);
 
-scene.add(xwing);
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.48, 1.7, 14), hullMat);
+  nose.rotation.x = Math.PI / 2;
+  nose.position.z = 4.75;
+  g.add(nose);
 
-/* ---- Engine glow helper ------------------------------------------------- */
-function makeHaloTexture() {
-  const c = document.createElement('canvas');
-  c.width = c.height = 128;
-  const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-  g.addColorStop(0.0, 'rgba(255,200,140,1)');
-  g.addColorStop(0.35, 'rgba(255,130,60,0.55)');
-  g.addColorStop(1.0, 'rgba(255,80,20,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 128, 128);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  const trim = new THREE.Mesh(new THREE.CylinderGeometry(0.49, 0.49, 0.22, 14), trimMat);
+  trim.rotation.x = Math.PI / 2;
+  trim.position.z = 3.75;
+  g.add(trim);
+
+  const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.46, 22, 16), canopyMat);
+  canopy.scale.set(1.0, 0.72, 2.35);
+  canopy.position.set(0, 0.4, 1.9);
+  g.add(canopy);
+
+  const engineGlows  = [];
+  const engineLights = [];
+  const engineHalos  = [];
+
+  for (const sx of [-1, 1]) {
+    for (const sy of [-1, 1]) {
+      const nac = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 2.5, 12), darkMat);
+      nac.rotation.x = Math.PI / 2;
+      nac.position.set(sx * 0.82, sy * 0.52, -1.95);
+      g.add(nac);
+
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.28, 0.28, 12), hullMat);
+      cap.rotation.x = Math.PI / 2;
+      cap.position.set(sx * 0.82, sy * 0.52, -0.78);
+      g.add(cap);
+
+      const glow = new THREE.Mesh(new THREE.CircleGeometry(0.30, 18), glowMat.clone());
+      glow.position.set(sx * 0.82, sy * 0.52, -3.22);
+      glow.rotation.y = Math.PI;
+      g.add(glow);
+      engineGlows.push(glow);
+
+      const haloCanvas = document.createElement('canvas');
+      haloCanvas.width = haloCanvas.height = 128;
+      const hctx = haloCanvas.getContext('2d');
+      const hg = hctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      hg.addColorStop(0.0, 'rgba(255,200,140,1)');
+      hg.addColorStop(0.35, 'rgba(255,130,60,0.55)');
+      hg.addColorStop(1.0, 'rgba(255,80,20,0)');
+      hctx.fillStyle = hg; hctx.fillRect(0, 0, 128, 128);
+      const haloTex = new THREE.CanvasTexture(haloCanvas);
+      haloTex.colorSpace = THREE.SRGBColorSpace;
+
+      const haloMat = new THREE.SpriteMaterial({
+        map: haloTex, blending: THREE.AdditiveBlending,
+        depthWrite: false, transparent: true, opacity: 1, fog: false
+      });
+      const halo = new THREE.Sprite(haloMat);
+      halo.scale.set(1.4, 1.4, 1);
+      halo.position.set(sx * 0.82, sy * 0.52, -3.25);
+      halo.userData.baseScale = 1.4;
+      g.add(halo);
+      engineHalos.push(halo);
+
+      const eLight = new THREE.PointLight(0xffa055, 2.4, 11, 2);
+      eLight.position.set(sx * 0.82, sy * 0.52, -3.3);
+      g.add(eLight);
+      engineLights.push(eLight);
+
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.08, 1.35), hullMat);
+      wing.position.set(sx * 2.35, sy * 1.4, -1.95);
+      wing.rotation.z = sx * sy * 0.4;
+      g.add(wing);
+
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.11, 1.37), trimMat);
+      stripe.position.set(sx * 3.48, sy * 2.05, -1.95);
+      stripe.rotation.z = sx * sy * 0.4;
+      g.add(stripe);
+    }
+  }
+
+  const rearBlock = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.95, 0.55), darkMat);
+  rearBlock.position.set(0, 0, -2.85);
+  g.add(rearBlock);
+
+  g.userData.engineGlows  = engineGlows;
+  g.userData.engineLights = engineLights;
+  g.userData.engineHalos  = engineHalos;
+  return g;
 }
 
-/* ---- Load the GLB ------------------------------------------------------- */
-const loader = new GLTFLoader();
-
-loader.load(
-  MODEL_CONFIG.path,
-
-  /* onLoad */
-  (gltf) => {
-    const model = gltf.scene;
-
-    /* --- 1. Auto-fit: scale so the longest dimension = targetSize --- */
-    const box0 = new THREE.Box3().setFromObject(model);
-    const size0 = box0.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size0.x, size0.y, size0.z);
-    const autoScale = MODEL_CONFIG.targetSize / maxDim;
-    model.scale.setScalar(autoScale * MODEL_CONFIG.scaleMultiplier);
-
-    /* --- 2. Center on origin --- */
-    const box1 = new THREE.Box3().setFromObject(model);
-    const center = box1.getCenter(new THREE.Vector3());
-    model.position.sub(center);
-
-    /* --- 3. Apply orientation offsets --- */
-    model.rotation.x += MODEL_CONFIG.rotationX;
-    model.rotation.y += MODEL_CONFIG.rotationY;
-    model.rotation.z += MODEL_CONFIG.rotationZ;
-
-    /* --- 4. Apply manual offset --- */
-    model.position.x += MODEL_CONFIG.offset.x;
-    model.position.y += MODEL_CONFIG.offset.y;
-    model.position.z += MODEL_CONFIG.offset.z;
-
-    /* --- 5. Prep materials: ensure they respond nicely to our lights --- */
-    model.traverse((o) => {
-      if (!o.isMesh) return;
-      o.castShadow = o.receiveShadow = true;
-      if (!o.material) return;
-
-      // Handle arrays of materials
-      const mats = Array.isArray(o.material) ? o.material : [o.material];
-      mats.forEach((m) => {
-        if ('envMapIntensity' in m) m.envMapIntensity = 1.0;
-        // Slight emissive lift so the hull isn't pitch black in low light
-        if (m.emissive && m.emissiveIntensity !== undefined) {
-          m.emissiveIntensity = Math.max(m.emissiveIntensity, 0.15);
-        }
-        // Ensure transparency is respected if the model has glass
-        if (m.transparent) m.depthWrite = false;
-      });
-    });
-
-    xwing.add(model);
-
-    /* --- 6. Auto-position engine glow at the rear of the model --- */
-    if (ENGINE_GLOW_ENABLED) {
-      // Recompute bounds AFTER scaling + rotating so glow lines up correctly
-      const box2 = new THREE.Box3().setFromObject(model);
-      const size = box2.getSize(new THREE.Vector3());
-      const min  = box2.min;
-      const max  = box2.max;
-
-      // Rear of the ship (in world/local group space)
-      // Assuming the model faces +Z after rotationY, "rear" is at min.z.
-      const rearZ = min.z + size.z * 0.02;   // tiny bit in front of the very rear
-      const cx    = (min.x + max.x) * 0.5;
-      const cy    = (min.y + max.y) * 0.5;
-
-      // Engine positions: 2×2 grid, offset from center
-      const ex = size.x * 0.20;
-      const ey = size.y * 0.22;
-
-      const haloTex = makeHaloTexture();
-      const glowGeo = new THREE.CircleGeometry(size.x * 0.075, 18);
-
-      const engineOffsets = [
-        [-ex, -ey], [+ex, -ey],
-        [-ex, +ey], [+ex, +ey]
-      ];
-
-      engineOffsets.forEach(([ox, oy], idx) => {
-        const px = cx + ox;
-        const py = cy + oy;
-
-        // Bright exhaust disc
-        const glowMat = new THREE.MeshBasicMaterial({
-          color: 0xffb070, fog: false, toneMapped: false,
-          transparent: true, opacity: 1
-        });
-        const glow = new THREE.Mesh(glowGeo, glowMat);
-        glow.position.set(px, py, rearZ - 0.01);
-        glow.rotation.y = Math.PI;
-        xwing.add(glow);
-        engineGlows.push(glow);
-
-        // Soft halo sprite (fake bloom)
-        const haloMat = new THREE.SpriteMaterial({
-          map: haloTex, blending: THREE.AdditiveBlending,
-          depthWrite: false, transparent: true, opacity: 1, fog: false
-        });
-        const halo = new THREE.Sprite(haloMat);
-        const haloSize = size.x * 0.32;
-        halo.scale.set(haloSize, haloSize, 1);
-        halo.position.set(px, py, rearZ - 0.05);
-        xwing.add(halo);
-        engineHalos.push(halo);
-
-        // Point light spilling backwards
-        const eLight = new THREE.PointLight(0xffa055, 2.6, size.x * 3.2, 2);
-        eLight.position.set(px, py, rearZ - 0.15);
-        xwing.add(eLight);
-        engineLights.push(eLight);
-      });
-    }
-
-    modelLoaded = true;
-
-    // Kick off autoplay now that the ship is ready
-    if (!reduceMotion) {
-      setTimeout(startAutoplay, 250);
-    } else {
-      replayBtn.classList.remove('ui-hidden');
-    }
-  },
-
-  /* onProgress */
-  (xhr) => {
-    if (xhr.lengthComputable) {
-      const pct = Math.round((xhr.loaded / xhr.total) * 100);
-      autoplayBadge.innerHTML =
-        `<span class="dot"></span> Loading ship · ${pct}%`;
-      autoplayBadge.classList.remove('ui-hidden');
-    }
-  },
-
-  /* onError */
-  (err) => {
-    console.error('Failed to load X-Wing GLB:', err);
-    autoplayBadge.innerHTML =
-      `<span class="dot"></span> Ship failed to load · check console`;
-    autoplayBadge.classList.remove('ui-hidden');
-  }
-);
+const xwing = createXWingPlaceholder();
+xwing.position.set(0, 0, -110);
+xwing.rotation.set(0, 0, 0);
+scene.add(xwing);
 
 /* ============================================================================
  * 8. STATE
@@ -1032,7 +938,16 @@ function applyTransforms() {
 }
 
 /* ============================================================================
- * 9. TIMELINE — velocity-continuous eases
+ * 9. TIMELINE — retimed for punchier pacing
+ * ---------------------------------------------------------------------------
+ *  Phase breakdown (was → now):
+ *    approach   0.28 → 0.30   (slightly longer, feels like a rocket)
+ *    moment     0.22 → 0.15   (SHORTER hang — less waiting around)
+ *    whip P1    0.14 → 0.13
+ *    whip P2    0.14 → 0.13
+ *    into gal   0.22 → 0.29   (longer, sweeping exit)
+ *                ───    ───
+ *               1.00   1.00  ✓
  * ==========================================================================*/
 let scrollTimeline = null;
 
@@ -1049,63 +964,63 @@ function buildScrollTimeline() {
     }
   });
 
-  /* --- APPROACH (0.00 → 0.28) --- */
+  /* --- APPROACH (0.00 → 0.30) --- */
   tl.to(shipState, {
     x: 0, y: 0.4, z: -12,
     rotX: 0, rotY: 0.02, rotZ: 0.03,
-    duration: 0.28, ease: 'power2.in'
+    duration: 0.30, ease: 'power2.in'
   }, 0);
   tl.to(camState, {
     x: 0.4, y: 2.5, z: 12.5,
-    duration: 0.28, ease: 'sine.inOut'
+    duration: 0.30, ease: 'sine.inOut'
   }, 0);
 
-  /* --- THE MOMENT (0.28 → 0.50) --- */
+  /* --- THE MOMENT (0.30 → 0.45) — short, dramatic hang --- */
   tl.to(shipState, {
     x: 0.4, y: 0.6, z: 4,
     rotX: 0, rotY: 0.06, rotZ: -0.06,
-    duration: 0.22, ease: 'power2.out'
-  }, 0.28);
+    duration: 0.15, ease: 'power2.out'
+  }, 0.30);
   tl.to(camState, {
     x: 0.6, y: 2.7, z: 12.2,
-    duration: 0.22, ease: 'sine.inOut'
-  }, 0.28);
+    duration: 0.15, ease: 'sine.inOut'
+  }, 0.30);
 
-  /* --- WHIP PAST (0.50 → 0.78) --- */
+  /* --- WHIP PAST (0.45 → 0.71) --- */
   tl.to(shipState, {
     x: 3.5, y: 1.4, z: 12,
     rotX: -0.10, rotY: 0.28, rotZ: -0.30,
-    duration: 0.14, ease: 'power2.in'
-  }, 0.50);
+    duration: 0.13, ease: 'power2.in'
+  }, 0.45);
   tl.to(shipState, {
     x: 14, y: 3.8, z: 30,
     rotX: -0.35, rotY: 0.85, rotZ: -0.85,
-    duration: 0.14, ease: 'power2.out'
-  }, 0.64);
+    duration: 0.13, ease: 'power2.out'
+  }, 0.58);
   tl.to(camState, {
     x: 1.0, y: 3.0, z: 11.5,
-    duration: 0.28, ease: 'sine.inOut'
-  }, 0.50);
+    duration: 0.26, ease: 'sine.inOut'
+  }, 0.45);
 
-  tl.to(camState, { shake: 1, duration: 0.08, ease: 'sine.out' }, 0.55);
-  tl.to(camState, { shake: 0, duration: 0.16, ease: 'sine.in'  }, 0.68);
+  tl.to(camState, { shake: 1, duration: 0.08, ease: 'sine.out' }, 0.50);
+  tl.to(camState, { shake: 0, duration: 0.14, ease: 'sine.in'  }, 0.62);
 
-  tl.to(fovState, { value: 64, duration: 0.08, ease: 'sine.in'  }, 0.52);
-  tl.to(fovState, { value: 50, duration: 0.20, ease: 'sine.out' }, 0.60);
+  tl.to(fovState, { value: 64, duration: 0.07, ease: 'sine.in'  }, 0.47);
+  tl.to(fovState, { value: 50, duration: 0.18, ease: 'sine.out' }, 0.54);
 
-  /* --- INTO THE GALAXY (0.78 → 1.00) --- */
+  /* --- INTO THE GALAXY (0.71 → 1.00) --- */
   tl.to(shipState, {
     x: 220, y: 130, z: 260,
     rotX: -1.05, rotY: 1.75, rotZ: -0.15,
-    duration: 0.22, ease: 'power2.in'
-  }, 0.78);
+    duration: 0.29, ease: 'power2.in'
+  }, 0.71);
 
   tl.to(camState, {
     x: 1.4, y: 3.3, z: 9.5,
-    duration: 0.22, ease: 'sine.inOut'
-  }, 0.78);
+    duration: 0.29, ease: 'sine.inOut'
+  }, 0.71);
 
-  tl.to(fovState, { value: 42, duration: 0.22, ease: 'sine.inOut' }, 0.78);
+  tl.to(fovState, { value: 42, duration: 0.29, ease: 'sine.inOut' }, 0.71);
 
   return tl;
 }
@@ -1115,7 +1030,7 @@ function onProgress(p) {
   progressBar.style.width = (p * 100) + '%';
   shakeTick += 1;
 
-  let flash = Math.max(0, 1 - Math.abs(p - 0.55) / 0.06);
+  let flash = Math.max(0, 1 - Math.abs(p - 0.52) / 0.06);
   flash = flash * flash * (3 - 2 * flash);
   flashEl.style.opacity = (reduceMotion ? flash * 0.2 : flash * 0.55).toFixed(3);
 }
@@ -1124,7 +1039,12 @@ scrollTimeline = buildScrollTimeline();
 applyTransforms();
 
 /* ============================================================================
- * 10. IDLE DRIFT
+ * 10. IDLE DRIFT — WITH SMOOTH UNWIND ON SCROLL BACK
+ * ---------------------------------------------------------------------------
+ *  When at the bottom of the page, the ship keeps flying toward the galaxy.
+ *  When the user scrolls back up (progress drops below the threshold), the
+ *  drift UNWINDS smoothly back to zero, so the ship returns to its exact
+ *  scroll-driven position and the reverse animation plays cleanly.
  * ==========================================================================*/
 const shipFinalPos   = new THREE.Vector3(220, 130, 260);
 const driftDirection = GALAXY_POS.clone().sub(shipFinalPos).normalize();
@@ -1138,10 +1058,16 @@ function updateIdleDrift(dt) {
   const atEnd = scrollProgress > 0.985;
 
   if (atEnd) {
+    // Ease toward max drift — slows as we get close to the galaxy
     const remaining  = driftMaxDist - idleDist;
     const easeFactor = Math.max(0.15, remaining / driftMaxDist);
     const speed      = 55 * easeFactor;
     idleDist = Math.min(driftMaxDist, idleDist + speed * dt);
+  } else if (idleDist > 0) {
+    // Smoothly unwind back to zero when scrolling away from the end.
+    // Exponential decay: ~90% of the way back in half a second.
+    idleDist *= Math.pow(0.01, dt);
+    if (idleDist < 0.05) idleDist = 0;
   }
 
   const dx = driftDirection.x * idleDist;
@@ -1297,9 +1223,9 @@ document.querySelectorAll('section').forEach((section) => {
 });
 
 /* ============================================================================
- * 12. AUTOPLAY
+ * 12. AUTOPLAY — faster
  * ==========================================================================*/
-const AUTOPLAY_SECONDS = 22;
+const AUTOPLAY_SECONDS = 13;   // was 22 → much snappier
 
 let autoTween   = null;
 let autoActive  = false;
@@ -1312,10 +1238,12 @@ function getScrollTrigger() {
 
 function startAutoplay() {
   if (reduceMotion || !scrollTimeline) return;
-  // Don't start until the ship is in the scene
-  if (!modelLoaded) return;
 
+  // Reset drift AND timeline so the flight always starts cleanly
   idleDist = 0;
+  shipState.idleX = shipState.idleY = shipState.idleZ = 0;
+  camState.idleX  = camState.idleY  = camState.idleZ  = 0;
+
   scrollTimeline.progress(0);
   window.scrollTo(0, 0);
 
@@ -1376,6 +1304,10 @@ function cancelAutoplay() {
   }, { passive: true });
 });
 
+window.addEventListener('load', () => {
+  setTimeout(startAutoplay, 500);
+});
+
 replayBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   startAutoplay();
@@ -1426,16 +1358,19 @@ function animate() {
     rock.rotation.z += s.z * dt;
   }
 
-  // Pulsing engine glow (only if the glow was created)
-  for (let i = 0; i < engineGlows.length; i++) {
+  const glows  = xwing.userData.engineGlows  || [];
+  const lights = xwing.userData.engineLights || [];
+  const halos  = xwing.userData.engineHalos  || [];
+
+  for (let i = 0; i < glows.length; i++) {
     const pulse = 0.78 + 0.22 * Math.sin(t * 10 + i * 1.7);
-    engineGlows[i].material.opacity = pulse;
-    if (engineLights[i]) engineLights[i].intensity = 1.8 + 0.9 * pulse;
-    if (engineHalos[i]) {
-      engineHalos[i].material.opacity = 0.55 + 0.45 * pulse;
-      const baseScale = engineHalos[i].userData.baseScale || 1;
+    glows[i].material.opacity = pulse;
+    if (lights[i]) lights[i].intensity = 1.8 + 0.9 * pulse;
+    if (halos[i]) {
+      halos[i].material.opacity = 0.55 + 0.45 * pulse;
+      const baseScale = halos[i].userData.baseScale || 1.4;
       const hs = baseScale * (1 + 0.22 * pulse);
-      engineHalos[i].scale.set(hs, hs, 1);
+      halos[i].scale.set(hs, hs, 1);
     }
   }
 
